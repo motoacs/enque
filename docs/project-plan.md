@@ -1,6 +1,6 @@
 # Enque プロジェクト計画書
 
-document version: v4.1
+document version: v4.3
 
 ## 1. プロジェクト概要
 
@@ -106,7 +106,7 @@ NVEncC 8.x系（NVENC API 13.0）以降を対象とする。7.x以前はサポ�
 
 ### F-03: エンコード設定 — GUIウィジェット（第1層）
 
-日常的に使う主要オプションをGUIウィジェットで提供する。
+日常的に使う主要オプションに加えて、`docs/nvenc-gui-configurable-options.md` で列挙した上級オプションをGUIウィジェットで提供する。
 
 **映像基本**
 
@@ -118,7 +118,7 @@ NVEncC 8.x系（NVENC API 13.0）以降を対象とする。7.x以前はサポ�
 | プリセット | `-u` / `--preset` | ドロップダウン (P1〜P7) |
 | 出力ビット深度 | `--output-depth` | ドロップダウン (8 / 10) |
 | マルチパス | `--multipass` | ドロップダウン (none / quarter / full) |
-| 出力解像度 | `--output-res` | テキスト入力 (例: 1920x1080, 空=変更なし) |
+| 出力解像度 | `--output-res` | テキスト入力 (例: `1920x1080`, `1920x1080,preserve_aspect_ratio=decrease`, 空=変更なし) |
 
 **映像詳細**
 
@@ -138,6 +138,7 @@ NVEncC 8.x系（NVENC API 13.0）以降を対象とする。7.x以前はサポ�
 | Split Encoding | `--split-enc` | ドロップダウン (off / auto / auto_forced / forced_2 / forced_3 / forced_4) |
 | Parallel Encoding | `--parallel` | ドロップダウン (off / auto / 2 / 3) |
 | デコーダ | `--avhw` / `--avsw` | ドロップダウン |
+| ソフトウェアデコーダ詳細 | `--avsw [<string>]` | テキスト入力（任意、`decoder=avsw` 時のみ有効） |
 | デバイス指定 | `--device` | ドロップダウン (auto / GPU ID) |
 
 `--split-enc` / `--parallel` はNVEncCのバージョンやGPU世代によって対応コーデックが異なる。UI上はコーデックに関わらず常に選択可能とするが、H.264選択時には「NVEncCの制約により、HEVC/AV1以外では失敗する場合があります」の注釈を表示する。NVEncCがエラーを返した場合はそのエラーメッセージをログに表示し、ジョブをエラーとして処理する。
@@ -157,10 +158,7 @@ NVEncC 8.x系（NVENC API 13.0）以降を対象とする。7.x以前はサポ�
 | Transfer | `--transfer` | ドロップダウン (auto / bt709 / smpte2084 / arib-std-b67 等) |
 | Color Primaries | `--colorprim` | ドロップダウン (auto / bt709 / bt2020 等) |
 | Color Range | `--colorrange` | ドロップダウン (auto / limited / full) |
-| MaxCLL | `--max-cll` | テキスト入力 (copy / 手動値) |
-| Master Display | `--master-display` | テキスト入力 (copy / 手動値) |
 | HDR10+ | `--dhdr10-info` | ドロップダウン (off / copy) |
-| Dolby Vision RPU | `--dolby-vision-rpu` | ドロップダウン (off / copy) |
 
 **メタデータ**
 
@@ -175,6 +173,47 @@ NVEncC 8.x系（NVENC API 13.0）以降を対象とする。7.x以前はサポ�
 | データトラック | `--data-copy` | トグル |
 | 添付ファイル | `--attachment-copy` | トグル |
 | ファイル日時復元 | (アプリ独自機能) | トグル |
+
+**上級オプション（NVEncC Advanced）**
+
+以下は「詳細設定」パネルで提供する。複雑な文法を持つ項目は、オプション専用のテキスト入力（raw）で受け取り、そのまま引数化する。
+
+| 設定項目 | NVEncCオプション | UIコントロール |
+|---|---|---|
+| インターレース | `--interlace` | ドロップダウン |
+| 入力CSP | `--input-csp` | ドロップダウン |
+| 出力CSP | `--output-csp` | ドロップダウン |
+| Tune | `--tune` | ドロップダウン |
+| Max Bitrate | `--max-bitrate` | 数値入力 |
+| VBR Quality | `--vbr-quality` | 数値入力 |
+| Lookahead Level | `--lookahead-level` | 数値入力 |
+| Weighted P Frame | `--weightp` | トグル |
+| MV Precision | `--mv-precision` | ドロップダウン |
+| AV1 Forward Refs | `--refs-forward` | 数値入力 |
+| AV1 Backward Refs | `--refs-backward` | 数値入力 |
+| Level | `--level` | テキスト入力 |
+| Profile | `--profile` | テキスト入力 |
+| Tier | `--tier` | ドロップダウン |
+| SSIM計測 | `--ssim` | トグル |
+| PSNR計測 | `--psnr` | トグル |
+| Trim | `--trim` | テキスト入力（raw） |
+| Seek | `--seek` | テキスト入力（raw） |
+| SeekTo | `--seekto` | テキスト入力（raw） |
+| Video Metadata（詳細） | `--video-metadata` | テキスト入力（raw） |
+| Audio Copy（詳細） | `--audio-copy` | テキスト入力（raw） |
+| Audio Codec（詳細） | `--audio-codec` | テキスト入力（raw） |
+| Audio Bitrate（詳細） | `--audio-bitrate` | テキスト入力（raw） |
+| Audio Quality（詳細） | `--audio-quality` | テキスト入力（raw） |
+| Audio Samplerate（詳細） | `--audio-samplerate` | テキスト入力（raw） |
+| Audio Metadata（詳細） | `--audio-metadata` | テキスト入力（raw） |
+| Subtitle Copy（詳細） | `--sub-copy` | テキスト入力（raw） |
+| Subtitle Metadata（詳細） | `--sub-metadata` | テキスト入力（raw） |
+| Data Copy（詳細） | `--data-copy` | テキスト入力（raw） |
+| Attachment Copy（詳細） | `--attachment-copy` | テキスト入力（raw） |
+| Metadata（詳細） | `--metadata` | テキスト入力（raw） |
+| Output Thread | `--output-thread` | 数値入力 |
+
+上級オプションは第1層GUIに含める。第1層内で同一オプションが重複する場合は「標準GUIより上級GUIを後方優先」で解決する。
 
 ### F-04: カスタムオプション（第2層）
 
@@ -467,7 +506,7 @@ Profile {
     preset:      "P1" ... "P7"
     output_depth: 8 | 10
     multipass:   "none" | "quarter" | "full"
-    output_res:  string  (空文字 = 変更なし)
+    output_res:  string  (空文字 = 変更なし。`WxH[,key=value...]` を許容)
 
     // 映像詳細
     bframes:     int | null  (null = NVEncCデフォルトに委ねる)
@@ -492,10 +531,7 @@ Profile {
     transfer:    "auto" | "bt709" | "smpte2084" | "arib-std-b67" | ...
     colorprim:   "auto" | "bt709" | "bt2020" | ...
     colorrange:  "auto" | "limited" | "full"
-    max_cll:     string  ("" | "copy" | 手動値)
-    master_display: string
     dhdr10_info: "off" | "copy"
-    dolby_vision_rpu: "off" | "copy"
 
     // メタデータ
     metadata_copy:       bool
@@ -506,6 +542,44 @@ Profile {
     data_copy:           bool
     attachment_copy:     bool
     restore_file_time:   bool
+
+    // 上級GUIオプション（第1層詳細設定）
+    // 空文字 / null は「未指定（出力しない）」を意味する
+    nvencc_advanced: {
+        interlace:          string
+        avsw_decoder:       string
+        input_csp:          string
+        output_csp:         string
+        tune:               string
+        max_bitrate:        int | null
+        vbr_quality:        float | null
+        lookahead_level:    int | null
+        weightp:            bool
+        mv_precision:       string
+        refs_forward:       int | null
+        refs_backward:      int | null
+        level:              string
+        profile:            string
+        tier:               string
+        ssim:               bool
+        psnr:               bool
+        trim:               string
+        seek:               string
+        seekto:             string
+        video_metadata:     string
+        audio_copy:         string
+        audio_codec:        string
+        audio_bitrate:      string
+        audio_quality:      string
+        audio_samplerate:   string
+        audio_metadata:     string
+        sub_copy:           string
+        sub_metadata:       string
+        data_copy:          string
+        attachment_copy:    string
+        metadata:           string
+        output_thread:      int | null
+    }
 
     // カスタムオプション（第2層）
     custom_options: string
@@ -546,7 +620,7 @@ AppConfig {
 
 ### 6.10 テスト戦略
 
-**ユニットテスト（最優先）**: `encoder/registry` + `nvencc/command_builder`。プロファイルの各組み合わせに対して、期待されるコマンドライン引数列を検証する。カスタムオプションの追加、nullフィールドの省略、コーデック固有オプションの出し分け等を網羅する。
+**ユニットテスト（最優先）**: `encoder/registry` + `nvencc/command_builder`。プロファイルの各組み合わせに対して、期待されるコマンドライン引数列を検証する。カスタムオプションの追加、nullフィールドの省略、コーデック固有オプションの出し分け、標準GUI/上級GUI/custom の後方優先を網羅する。
 
 **ユニットテスト**: `nvencc/progress_parser.go`。開発初期段階で収集した実出力サンプルをテストデータとし、パーサーが正しく進捗値を抽出することを検証する。パース失敗時のフォールバック動作（「不明」として扱い続行する）も検証する。
 

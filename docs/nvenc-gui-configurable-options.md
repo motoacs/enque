@@ -1,0 +1,62 @@
+# Enque GUIで設定可能にしたいオプションリスト
+
+- エンコードの基本的なオプション
+  - -c, --codec \<string\>
+  - --avsw \[\<string\>\]
+  - --avhw
+  - --interlace \<string\>
+  - --output-res \<int\>x\<int\>\[,\<string\>=\<string\>\]
+  - --input-csp \<string\>
+- エンコードモードのオプション
+  - --qvbr  \<float\> (固定品質モード)
+  - --cbr \<int\>   (固定ビットレート)
+  - --vbr \<int\>   (可変ビットレート)
+  - --cqp \<int\> or \<int\>:\<int\>:\<int\>　(固定量子化量)
+- その他のオプション
+  - -u, --preset
+  - --tune \<string\>
+  - --output-depth \<int\>
+  - --output-csp \<string\>
+  - --multipass \<string\>
+  - --max-bitrate \<int\>
+  - --vbr-quality \<float\>
+  - --lookahead \<int\>
+  - --lookahead-level \<int\>
+  - --gop-len \<int\>
+  - -b, --bframes \<int\>
+  - --ref \<int\>
+  - --weightp
+  - --mv-precision \<string\>
+  - --refs-forward \<int\> \[AV1\]
+  - --refs-backward \<int\> \[AV1\]
+  - --level \<string\>
+  - --profile \<string\>
+  - --tier \<string\>
+  - --colorrange \<string\>
+  - --colormatrix \<string\>
+  - --colorprim \<string\>
+  - --transfer \<string\>
+  - --dhdr10-info copy \[HEVC, AV1\]
+  - --split-enc \<string\>
+  - --ssim
+  - --psnr
+- 入出力 / 音声 / 字幕などのオプション
+  - --trim \<int\>:\<int\>\[,\<int\>:\<int\>\]\[,\<int\>:\<int\>\]...
+  - --seek \[\[\<int\>:\]\<int\>:\]\<int\>\[.\<int\>\]
+  - --seekto \[\[\<int\>:\]\<int\>:\]\<int\>\[.\<int\>\]
+  - --video-metadata \[\<int\>?\]\<string\> or \[\<int\>?\]\<string\>=\<string\>
+  - --audio-copy \[\<int/string\>;\[,\<int/string\>\]...\]
+  - --audio-codec \[\[\<int/string\>?\]\<string\>\[:\<string\>=\<string\>\[,\<string\>=\<string\>\]...\]...\]
+  - --audio-bitrate \[\<int/string\>?\]\<int\> or \[\<int/string\>?\]\<string\>:\<int\>\[,\<string\>:\<int\>\]\[,...\]
+  - --audio-quality \[\<int/string\>?\]\<int\>
+  - --audio-samplerate \[\<int/string\>?\]\<int\>
+  - --audio-metadata \[\<int/string\>?\]\<string\> or \[\<int/string\>?\]\<string\>=\<string\>
+  - --chapter-copy
+  - --sub-copy \[\<int/string\>;\[,\<int/string\>\]...\]
+  - --sub-metadata \[\<int/string\>?\]\<string\> or \[\<int/string\>?\]\<string\>=\<string\>
+  - --data-copy \[\<int\>\[,\<int\>\]...\]
+  - --attachment-copy \[\<int\>\[,\<int\>\]...\]
+  - --metadata \<string\> or \<string\>=\<string\>
+- 制御系のオプション
+  - --parallel \[\<int\>\] or \[\<string\>\]
+  - --output-thread \<int\>

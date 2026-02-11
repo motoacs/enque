@@ -1,6 +1,6 @@
 # Enque 詳細設計書（SSOT）
 
-document version: v1.0
+document version: v1.2
 
 ## 0. 文書情報
 
@@ -8,7 +8,7 @@ document version: v1.0
 | --- | --- |
 | 文書ID | ENQ-DS-001 |
 | 文書名 | Enque 詳細設計書（Single Source of Truth） |
-| 対象計画書 | `docs/project-plan.md`（Enque プロジェクト計画書 v4.1） |
+| 対象計画書 | `docs/project-plan.md`（Enque プロジェクト計画書 v4.3） |
 | 対象バージョン | Enque v1.0.0（NVEncC実装 + マルチエンコーダ拡張基盤） |
 | 最終更新 | 2026-02-11 |
 | 対象環境 | Windows 11 (x64), NVEncC 8.x 以降（QSVEncC/ffmpeg拡張を考慮） |
@@ -185,7 +185,7 @@ frontend/
 ```json
 {
   "id": "uuid",
-  "version": 2,
+  "version": 4,
   "name": "string(1..80)",
   "is_preset": false,
   "encoder_type": "nvencc",
@@ -213,10 +213,7 @@ frontend/
   "transfer": "auto",
   "colorprim": "auto",
   "colorrange": "auto",
-  "max_cll": "",
-  "master_display": "",
   "dhdr10_info": "off",
-  "dolby_vision_rpu": "off",
   "metadata_copy": true,
   "video_metadata_copy": true,
   "audio_metadata_copy": true,
@@ -225,6 +222,41 @@ frontend/
   "data_copy": true,
   "attachment_copy": true,
   "restore_file_time": false,
+  "nvencc_advanced": {
+    "interlace": "",
+    "avsw_decoder": "",
+    "input_csp": "",
+    "output_csp": "",
+    "tune": "",
+    "max_bitrate": null,
+    "vbr_quality": null,
+    "lookahead_level": null,
+    "weightp": false,
+    "mv_precision": "",
+    "refs_forward": null,
+    "refs_backward": null,
+    "level": "",
+    "profile": "",
+    "tier": "",
+    "ssim": false,
+    "psnr": false,
+    "trim": "",
+    "seek": "",
+    "seekto": "",
+    "video_metadata": "",
+    "audio_copy": "",
+    "audio_codec": "",
+    "audio_bitrate": "",
+    "audio_quality": "",
+    "audio_samplerate": "",
+    "audio_metadata": "",
+    "sub_copy": "",
+    "sub_metadata": "",
+    "data_copy": "",
+    "attachment_copy": "",
+    "metadata": "",
+    "output_thread": null
+  },
   "custom_options": ""
 }
 ```
@@ -238,9 +270,18 @@ frontend/
 | `encoder_options` | JSON object（最大 64KB） |
 | `rate_value` | `> 0` |
 | `output_depth` | `8` or `10` |
+| `output_res` | 空文字または `^\d+x\d+(,[^,=]+=[^,=]+)*$` |
 | `bframes` | `null` or `0..7` |
 | `lookahead` | `null` or `0..32` |
 | `audio_bitrate` | `32..1024` |
+| `nvencc_advanced` | JSON object。未知キー禁止 |
+| `nvencc_advanced.max_bitrate` | `null` or `>0` |
+| `nvencc_advanced.vbr_quality` | `null` or `>0` |
+| `nvencc_advanced.lookahead_level` | `null` or `>=0` |
+| `nvencc_advanced.refs_forward` | `null` or `>=0` |
+| `nvencc_advanced.refs_backward` | `null` or `>=0` |
+| `nvencc_advanced.output_thread` | `null` or `1..64` |
+| `nvencc_advanced.*(string)` | UTF-8、各 0..1024 文字 |
 | `custom_options` | UTF-8、最大 4096 文字 |
 | `device` | `auto` or `0..15` |
 
@@ -528,16 +569,22 @@ v1では上記2種類のみを正式サポートする。未知変数は文字�
 
 1. adapter前置オプション
 2. 入力
-3. GUI層オプション
-4. カスタムオプション（後勝ち）
-5. 出力
+3. GUI層オプション（標準）
+4. GUI層オプション（上級: `nvencc_advanced`）
+5. カスタムオプション（後勝ち）
+6. 出力
 
 `nvencc` adapter では従来順序（`--avhw/--avsw` -> `-i` -> `-c` -> GUI -> custom -> `-o`）を固定契約として維持する。順序変更は互換性破壊として扱う。
+`-i` / `-o` はキュー/出力設定からシステムが決定し、GUI直接編集対象にしない。
 
 ## 9.3.2 GUI項目 -> NVEncC オプション（`nvencc` adapter）
 
 | GUI項目 | 条件 | 出力引数 |
 | --- | --- | --- |
+| `decoder=avhw` | 常時 | `--avhw` |
+| `decoder=avsw && nvencc_advanced.avsw_decoder=empty` | 条件 | `--avsw` |
+| `decoder=avsw && nvencc_advanced.avsw_decoder!=empty` | 条件 | `--avsw <decoder>` |
+| `codec` | 常時 | `-c <h264|hevc|av1>` |
 | `rate_control=qvbr` | 常時 | `--qvbr <rate_value>` |
 | `rate_control=cqp` | 常時 | `--cqp <rate_value>` |
 | `rate_control=cbr` | 常時 | `--cbr <rate_value>` |
@@ -545,15 +592,30 @@ v1では上記2種類のみを正式サポートする。未知変数は文字�
 | `preset` | 常時 | `--preset <P1..P7>` |
 | `output_depth` | 常時 | `--output-depth <8|10>` |
 | `multipass!=none` | 条件 | `--multipass <quarter|full>` |
-| `output_res!=empty` | 条件 | `--output-res <WxH>` |
+| `output_res!=empty` | 条件 | `--output-res <raw>` |
+| `nvencc_advanced.interlace!=empty` | 条件 | `--interlace <value>` |
+| `nvencc_advanced.input_csp!=empty` | 条件 | `--input-csp <value>` |
+| `nvencc_advanced.output_csp!=empty` | 条件 | `--output-csp <value>` |
+| `nvencc_advanced.tune!=empty` | 条件 | `--tune <value>` |
 | `bframes!=null` | 条件 | `--bframes <n>` |
 | `ref!=null` | 条件 | `--ref <n>` |
 | `lookahead!=null` | 条件 | `--lookahead <n>` |
+| `nvencc_advanced.lookahead_level!=null` | 条件 | `--lookahead-level <n>` |
 | `gop_len!=null` | 条件 | `--gop-len <n>` |
 | `aq=true` | 条件 | `--aq` |
 | `aq_temporal=true` | 条件 | `--aq-temporal` |
+| `nvencc_advanced.max_bitrate!=null` | 条件 | `--max-bitrate <n>` |
+| `nvencc_advanced.vbr_quality!=null` | 条件 | `--vbr-quality <v>` |
+| `nvencc_advanced.weightp=true` | 条件 | `--weightp` |
+| `nvencc_advanced.mv_precision!=empty` | 条件 | `--mv-precision <value>` |
+| `nvencc_advanced.refs_forward!=null` | 条件 | `--refs-forward <n>` |
+| `nvencc_advanced.refs_backward!=null` | 条件 | `--refs-backward <n>` |
+| `nvencc_advanced.level!=empty` | 条件 | `--level <value>` |
+| `nvencc_advanced.profile!=empty` | 条件 | `--profile <value>` |
+| `nvencc_advanced.tier!=empty` | 条件 | `--tier <value>` |
 | `split_enc!=off` | 条件 | `--split-enc <mode>` |
 | `parallel!=off` | 条件 | `--parallel <mode>` |
+| `nvencc_advanced.output_thread!=null` | 条件 | `--output-thread <n>` |
 | `device!=auto` | 条件 | `--device <id>` |
 | `audio_mode=copy` | 常時 | `--audio-copy` |
 | `audio_mode=aac` | 常時 | `--audio-codec aac --audio-bitrate <n>` |
@@ -562,10 +624,7 @@ v1では上記2種類のみを正式サポートする。未知変数は文字�
 | `transfer!=auto` | 条件 | `--transfer <value>` |
 | `colorprim!=auto` | 条件 | `--colorprim <value>` |
 | `colorrange!=auto` | 条件 | `--colorrange <value>` |
-| `max_cll!=empty` | 条件 | `--max-cll <value>` |
-| `master_display!=empty` | 条件 | `--master-display <value>` |
 | `dhdr10_info=copy` | 条件 | `--dhdr10-info copy` |
-| `dolby_vision_rpu=copy` | 条件 | `--dolby-vision-rpu copy` |
 | `metadata_copy=true` | 条件 | `--metadata copy` |
 | `video_metadata_copy=true` | 条件 | `--video-metadata copy` |
 | `audio_metadata_copy=true` | 条件 | `--audio-metadata copy` |
@@ -573,6 +632,25 @@ v1では上記2種類のみを正式サポートする。未知変数は文字�
 | `sub_copy=true` | 条件 | `--sub-copy` |
 | `data_copy=true` | 条件 | `--data-copy` |
 | `attachment_copy=true` | 条件 | `--attachment-copy` |
+| `nvencc_advanced.ssim=true` | 条件 | `--ssim` |
+| `nvencc_advanced.psnr=true` | 条件 | `--psnr` |
+| `nvencc_advanced.trim!=empty` | 条件 | `--trim <raw>` |
+| `nvencc_advanced.seek!=empty` | 条件 | `--seek <raw>` |
+| `nvencc_advanced.seekto!=empty` | 条件 | `--seekto <raw>` |
+| `nvencc_advanced.video_metadata!=empty` | 条件 | `--video-metadata <raw>` |
+| `nvencc_advanced.audio_copy!=empty` | 条件 | `--audio-copy <raw>` |
+| `nvencc_advanced.audio_codec!=empty` | 条件 | `--audio-codec <raw>` |
+| `nvencc_advanced.audio_bitrate!=empty` | 条件 | `--audio-bitrate <raw>` |
+| `nvencc_advanced.audio_quality!=empty` | 条件 | `--audio-quality <raw>` |
+| `nvencc_advanced.audio_samplerate!=empty` | 条件 | `--audio-samplerate <raw>` |
+| `nvencc_advanced.audio_metadata!=empty` | 条件 | `--audio-metadata <raw>` |
+| `nvencc_advanced.sub_copy!=empty` | 条件 | `--sub-copy <raw>` |
+| `nvencc_advanced.sub_metadata!=empty` | 条件 | `--sub-metadata <raw>` |
+| `nvencc_advanced.data_copy!=empty` | 条件 | `--data-copy <raw>` |
+| `nvencc_advanced.attachment_copy!=empty` | 条件 | `--attachment-copy <raw>` |
+| `nvencc_advanced.metadata!=empty` | 条件 | `--metadata <raw>` |
+
+同一オプションが「標準GUI」と `nvencc_advanced` の両方で指定された場合、`nvencc_advanced` 側を後方優先で採用する。`custom_options` がある場合はさらに `custom_options` が最終優先となる。
 
 ## 9.3.3 カスタムオプションの字句解析
 
@@ -674,6 +752,8 @@ v1では上記2種類のみを正式サポートする。未知変数は文字�
 - 旧版読み込み時は `migration.go` で最新へ変換
 - 変換不能時はバックアップ保存後、デフォルト生成 + 警告表示
 - `profile` の v1 -> v2 変換では `encoder_type="nvencc"` と `encoder_options={}` を補完する
+- `profile` の v2 -> v3 変換では `nvencc_advanced` を既定値（空/false/null）で補完する
+- `profile` の v3 -> v4 変換では `max_cll` / `master_display` / `dolby_vision_rpu` を削除し、`nvencc_advanced.avsw_decoder` を空文字で補完する
 
 ## 10.4 残存 tmp 検出
 
@@ -748,7 +828,7 @@ v1では未検出でも実行可能とする（警告のみ）。将来のadapte
 | 対象 | 観点 |
 | --- | --- |
 | `encoder/registry.go` | `encoder_type` と adapter解決、未実装エラー |
-| `nvencc/command_builder.go` | 引数順序、省略条件、後勝ち、Windowsパス |
+| `nvencc/command_builder.go` | 引数順序、省略条件、標準GUI/上級GUI/custom の後勝ち、Windowsパス |
 | `nvencc/progress_parser.go` | 正常系/異常系、コーデック別、split/parallel時 |
 | `output_resolver.go` | auto_rename採番、mutex排他、テンプレート |
 | `profile/config migration` | 旧版JSON -> 最新版 |
