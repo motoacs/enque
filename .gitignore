@@ -34,3 +34,6 @@ go.work.sum
 .DS_Store
 docs/NVEncC_Options.ja.md
 docs/NVEncC_Options.en.md
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo

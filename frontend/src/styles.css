@@ -1,0 +1,146 @@
+:root {
+  --bg: #f5f8ef;
+  --panel: #ffffff;
+  --text: #162124;
+  --line: #d4dfc8;
+  --accent: #0d5a53;
+  --accent-2: #d16d2a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'IBM Plex Sans', 'Hiragino Sans', sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(80rem 40rem at -20% -10%, #d4ecd6, transparent 70%),
+    radial-gradient(60rem 30rem at 120% 10%, #ffe1bf, transparent 70%),
+    var(--bg);
+}
+
+.app-root {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.state-tag {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.layout-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.panel,
+.preview-panel {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--panel);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table .row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #eef4e7;
+}
+
+.cell.path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.profile-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.preview-panel textarea,
+.profile-fields textarea,
+.profile-fields input,
+.profile-fields select {
+  width: 100%;
+}
+
+.monitor-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.job-pill {
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.log-box {
+  margin: 0;
+  height: 180px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  padding: 8px;
+  background: #f9fcf5;
+}
+
+.button {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.button input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .layout-grid {
+    grid-template-columns: 1fr;
+  }
+  .profile-fields {
+    grid-template-columns: 1fr;
+  }
+}

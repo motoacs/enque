@@ -78,3 +78,34 @@
 
 - 現在は主に仕様・設計ドキュメントが存在し、実装コードは未配置。
 - そのため新規コード追加時は、先にディレクトリ構成・ビルド/テストコマンドを明示し、本ファイルにも追記すること。
+
+## 11. 初期ディレクトリ構成・ビルド/テストコマンド
+
+実装開始後は以下の構成を基準とする。
+
+```text
+backend/
+  app/
+  config/
+  detector/
+  encoder/
+  logging/
+  metadata/
+  profile/
+  queue/
+frontend/
+  src/
+    features/
+    lib/
+    stores/
+```
+
+標準コマンド:
+
+- Goテスト: `go test ./...`
+- Go整形: `gofmt -w ./backend ./cmd`
+- Frontend依存解決: `cd frontend && npm install`
+- Frontendビルド: `cd frontend && npm run build`
+- Frontendテスト: `cd frontend && npm run test`
+- Wails開発起動: `wails dev`
+- Wails本番ビルド: `wails build -platform windows/amd64`

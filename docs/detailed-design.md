@@ -395,6 +395,7 @@ frontend/
 | `SetDefaultProfile(profileID)` | デフォルト設定 |
 | `GetGPUInfo()` | `--check-device`, `--check-features` 結果取得 |
 | `DetectExternalTools()` | NVEncC/QSVEncC/ffmpeg/ffprobe 検出 |
+| `PreviewCommand(request)` | command builder 共通ロジックでプレビュー生成 |
 | `StartEncode(request)` | セッション開始 |
 | `RequestGracefulStop(sessionID)` | 停止（次ジョブ抑止） |
 | `RequestAbort(sessionID)` | 中止（実行中含め強制終了） |
@@ -420,6 +421,32 @@ frontend/
 2. 実行中セッションがある場合は `E_SESSION_RUNNING` を返す。
 3. `profile` と `app_config_snapshot` は保存済み値ではなく、開始時点スナップショットを使用する。
 4. `profile.encoder_type` に対応するadapterが未登録の場合は `E_ENCODER_NOT_IMPLEMENTED` を返す。
+
+## 6.2.1 PreviewCommand 入出力契約
+
+```json
+{
+  "profile": {"...": "Profile object"},
+  "app_config_snapshot": {"...": "AppConfig object"},
+  "input_path": "C:\\in.mp4",
+  "output_path": "C:\\out.mkv"
+}
+```
+
+レスポンス:
+
+```json
+{
+  "argv": ["--avhw", "-i", "C:\\in.mp4", "...", "-o", "C:\\out.mkv"],
+  "display_command": "NVEncC64.exe --avhw -i \"C:\\in.mp4\" ... -o \"C:\\out.mkv\""
+}
+```
+
+ルール:
+
+1. `PreviewCommand` は `StartEncode` と同一の adapter / command builder を使用する。
+2. 失敗時のエラーコードは `E_VALIDATION` / `E_ENCODER_NOT_IMPLEMENTED` / `E_INTERNAL` とする。
+3. 表示文字列は参考表示（ベストエフォート）であり、厳密な再実行互換性を保証しない。
 
 ## 6.3 エラーコード
 
@@ -893,12 +920,10 @@ v1 同梱プリセットは以下とする（`is_preset=true`, `encoder_type="nv
 
 値は計画書記載内容に従う。プリセット本体は直接編集不可、複製して編集する運用とする。
 
-## 19. 未解決事項（v1実装前に確定）
+## 19. 実装前に確定した技術決定事項（v1）
 
-1. `overwrite_mode=ask` のUI（ジョブ単位ダイアログ or 一括ダイアログ）
-2. `post_complete_action=sleep` の実行コマンド最終確定
-3. `nvencc` 進捗正規表現の最終版（実機ログ収集後）
-4. `qsvenc` / `ffmpeg` adapter のオプションスキーマ確定
-5. `app.log` ローテーション実装方式（自前 or ライブラリ）
-
-上記は実装着手時の最初の技術決定事項とし、確定後に本書を更新する。
+1. `overwrite_mode=ask` のUIは「ジョブ単位ダイアログ + 以降に同じ選択を適用」で確定する。
+2. `post_complete_action=sleep` は Win32 API の直接呼び出しで実装する。
+3. `nvencc` 進捗正規表現は、実機ログ収集（H.264/HEVC/AV1 + split/parallel + エラー系）後にテストfixture化して凍結する。
+4. `qsvenc` / `ffmpeg` は v1 で `encoder_options` のみを契約とする最小stubに留め、実行は `E_ENCODER_NOT_IMPLEMENTED` で安全拒否する。
+5. `app.log` のローテーションは `lumberjack` を採用し、30日保持とする。
