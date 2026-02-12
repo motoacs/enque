@@ -74,7 +74,50 @@
 - 実行中ジョブの中間生成物を最終出力として扱うこと
 - 根拠のない最適化で並列制御の安全性を下げること
 
-## 10. 現在のリポジトリ状態に関する注記
+## 10. ビルド・テストコマンド
 
-- 現在は主に仕様・設計ドキュメントが存在し、実装コードは未配置。
-- そのため新規コード追加時は、先にディレクトリ構成・ビルド/テストコマンドを明示し、本ファイルにも追記すること。
+```bash
+# Go バックエンド
+cd /Users/yuta/Git/enque
+go build ./...
+go test ./...
+
+# フロントエンド
+cd /Users/yuta/Git/enque/frontend
+npm install
+npm run build
+
+# Wails 開発サーバー (macOS では UI 表示は未対応、ビルド確認のみ)
+export PATH="$HOME/go/bin:$PATH"
+wails build
+```
+
+## 11. ディレクトリ構成
+
+```
+backend/
+  app/app.go              Wails バインド対象
+  queue/                   セッション・ワーカープール
+  encoder/                 adapter・registry・process_runner
+    nvencc/                NVEncC adapter
+    qsvenc/                QSVEncC adapter (将来)
+    ffmpeg/                ffmpeg adapter (将来)
+  profile/                 プロファイル CRUD・マイグレーション
+  config/                  アプリ設定 CRUD・マイグレーション
+  detector/                外部ツール検出
+  metadata/                Win32 FileTime 復元
+  logging/                 job.json・stderr・アプリログ
+  events/                  Wails イベント発火
+frontend/src/
+  stores/                  Zustand stores (edit/profile/encode/app)
+  features/                機能別コンポーネント
+    queue/                 キュー管理
+    profile/               プロファイル編集
+    encode/                エンコード実行 UI
+    settings/              設定ダイアログ
+    output/                出力設定
+    preview/               コマンドプレビュー
+  lib/                     ユーティリティ (api, i18n, cn)
+  locales/                 i18n 翻訳ファイル (ja.json, en.json)
+  components/              共通コンポーネント
+```
