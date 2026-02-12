@@ -22,6 +22,8 @@ Enque is a Windows desktop batch encoder frontend for rigaya's NVEncC.
 ```bash
 go test ./...
 cd frontend && npm install && npm run build && npm run test
+wails dev
+wails build -platform windows/amd64
 ```
 
 ## Notes

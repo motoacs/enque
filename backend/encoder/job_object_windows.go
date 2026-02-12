@@ -18,7 +18,7 @@ func attachJobObject(p *os.Process) (jobHandle, bool, error) {
 	}
 	limitInfo := windows.JOBOBJECT_EXTENDED_LIMIT_INFORMATION{}
 	limitInfo.BasicLimitInformation.LimitFlags = windows.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
-	if err := windows.SetInformationJobObject(job, windows.JobObjectExtendedLimitInformation, uintptr(unsafe.Pointer(&limitInfo)), uint32(unsafe.Sizeof(limitInfo))); err != nil {
+	if _, err := windows.SetInformationJobObject(job, windows.JobObjectExtendedLimitInformation, uintptr(unsafe.Pointer(&limitInfo)), uint32(unsafe.Sizeof(limitInfo))); err != nil {
 		_ = windows.CloseHandle(job)
 		return 0, false, err
 	}
