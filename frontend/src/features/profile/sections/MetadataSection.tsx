@@ -31,11 +31,11 @@ export function MetadataSection() {
 
   return (
     <section>
-      <h3 className="text-xs font-semibold text-zinc-400 uppercase mb-2">
+      <h3 className="section-heading mb-3">
         {t("profile.metadata")}
       </h3>
-      <div className="space-y-1.5">
-        <label className="flex items-center gap-1.5 text-xs text-zinc-300 font-medium">
+      <div className="space-y-2">
+        <label className="flex items-center gap-2 text-xs font-medium cursor-pointer" style={{ color: '#e8e6e3' }}>
           <input
             type="checkbox"
             checked={allOn}
@@ -45,9 +45,9 @@ export function MetadataSection() {
           />
           {t("profile.metadataAll")}
         </label>
-        <div className="ml-4 space-y-1">
+        <div className="ml-5 space-y-1.5">
           {toggles.map(({ label, field }) => (
-            <label key={field} className="flex items-center gap-1.5 text-xs text-zinc-400">
+            <label key={field} className="flex items-center gap-2 text-xs cursor-pointer" style={{ color: '#9d9da7' }}>
               <input
                 type="checkbox"
                 checked={p[field]}

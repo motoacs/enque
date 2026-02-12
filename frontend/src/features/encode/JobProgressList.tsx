@@ -23,7 +23,7 @@ export function JobProgressList({ onSelectJob, selectedJobId }: JobProgressListP
         />
       ))}
       {jobs.length === 0 && (
-        <div className="text-xs text-zinc-500 text-center py-8">
+        <div className="text-xs text-center py-8" style={{ color: '#3c3c48' }}>
           {t("encode.pending")}
         </div>
       )}

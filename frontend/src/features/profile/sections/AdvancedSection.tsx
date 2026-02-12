@@ -29,14 +29,14 @@ export function AdvancedSection() {
     <section>
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-1 text-xs font-semibold text-zinc-400 uppercase mb-2 hover:text-zinc-300"
+        className="section-heading mb-3 hover:opacity-80 transition-opacity"
       >
         {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
         {t("profile.advanced")}
       </button>
 
       {expanded && (
-        <div className="space-y-2 ml-1">
+        <div className="space-y-2.5 animate-fade-in">
           {[
             { label: "Interlace", field: "interlace", type: "text" },
             { label: "SW Decoder", field: "avsw_decoder", type: "text" },
@@ -52,13 +52,13 @@ export function AdvancedSection() {
             { label: "Seek To", field: "seekto", type: "text" },
           ].map(({ label, field }) => (
             <div key={field} className="flex items-center gap-2">
-              <label className="text-xs text-zinc-400 w-28 shrink-0">{label}</label>
+              <label className="form-label w-28">{label}</label>
               <input
                 type="text"
                 value={(adv as any)[field] || ""}
                 onChange={(e) => setStr(field, e.target.value)}
                 disabled={isPreset}
-                className="flex-1 bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1 border border-zinc-600 disabled:opacity-60"
+                className="flex-1 form-input"
               />
             </div>
           ))}
@@ -72,25 +72,25 @@ export function AdvancedSection() {
             { label: "Output Thread", field: "output_thread" },
           ].map(({ label, field }) => (
             <div key={field} className="flex items-center gap-2">
-              <label className="text-xs text-zinc-400 w-28 shrink-0">{label}</label>
+              <label className="form-label w-28">{label}</label>
               <input
                 type="number"
                 value={(adv as any)[field] ?? ""}
                 onChange={(e) => setNullInt(field, e.target.value)}
                 disabled={isPreset}
                 placeholder="auto"
-                className="w-24 bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1 border border-zinc-600 disabled:opacity-60 placeholder:text-zinc-600"
+                className="w-24 form-input font-mono"
               />
             </div>
           ))}
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-5 pt-1">
             {[
               { label: "WeightP", field: "weightp" },
               { label: "SSIM", field: "ssim" },
               { label: "PSNR", field: "psnr" },
             ].map(({ label, field }) => (
-              <label key={field} className="flex items-center gap-1.5 text-xs text-zinc-400">
+              <label key={field} className="flex items-center gap-2 text-xs cursor-pointer" style={{ color: '#9d9da7' }}>
                 <input
                   type="checkbox"
                   checked={(adv as any)[field] || false}
@@ -104,8 +104,8 @@ export function AdvancedSection() {
           </div>
 
           {/* Advanced raw audio/sub/data overrides */}
-          <div className="mt-2 pt-2 border-t border-zinc-700">
-            <p className="text-xs text-zinc-500 mb-2">{t("profile.advancedOverrides")}</p>
+          <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <p className="text-xs mb-2.5" style={{ color: '#5c5c68' }}>{t("profile.advancedOverrides")}</p>
             {[
               { label: "Video Meta", field: "video_metadata" },
               { label: "Audio Copy", field: "audio_copy" },
@@ -120,14 +120,14 @@ export function AdvancedSection() {
               { label: "Attach Copy", field: "attachment_copy" },
               { label: "Metadata", field: "metadata" },
             ].map(({ label, field }) => (
-              <div key={field} className="flex items-center gap-2 mb-1">
-                <label className="text-xs text-zinc-500 w-28 shrink-0">{label}</label>
+              <div key={field} className="flex items-center gap-2 mb-2">
+                <label className="text-xs w-28 shrink-0" style={{ color: '#5c5c68' }}>{label}</label>
                 <input
                   type="text"
                   value={(adv as any)[field] || ""}
                   onChange={(e) => setStr(field, e.target.value)}
                   disabled={isPreset}
-                  className="flex-1 bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1 border border-zinc-600 disabled:opacity-60"
+                  className="flex-1 form-input"
                 />
               </div>
             ))}

@@ -14,10 +14,10 @@ export function VideoDetailSection() {
 
   return (
     <section>
-      <h3 className="text-xs font-semibold text-zinc-400 uppercase mb-2">
+      <h3 className="section-heading mb-3">
         {t("profile.videoDetail")}
       </h3>
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         {[
           { label: "B-Frames", field: "bframes", min: 0, max: 7 },
           { label: "Ref Frames", field: "ref", min: 0, max: 16 },
@@ -25,7 +25,7 @@ export function VideoDetailSection() {
           { label: "GOP Length", field: "gop_len", min: 0, max: 9999 },
         ].map(({ label, field, min, max }) => (
           <div key={field} className="flex items-center gap-2">
-            <label className="text-xs text-zinc-400 w-28 shrink-0">{label}</label>
+            <label className="form-label w-28">{label}</label>
             <input
               type="number"
               value={(p as any)[field] ?? ""}
@@ -34,13 +34,13 @@ export function VideoDetailSection() {
               min={min}
               max={max}
               placeholder="auto"
-              className="w-20 bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1 border border-zinc-600 disabled:opacity-60 placeholder:text-zinc-600"
+              className="w-20 form-input font-mono"
             />
           </div>
         ))}
 
-        <div className="flex items-center gap-4">
-          <label className="flex items-center gap-1.5 text-xs text-zinc-400">
+        <div className="flex items-center gap-5 pt-1">
+          <label className="flex items-center gap-2 text-xs cursor-pointer" style={{ color: '#9d9da7' }}>
             <input
               type="checkbox"
               checked={p.aq}
@@ -50,7 +50,7 @@ export function VideoDetailSection() {
             />
             AQ
           </label>
-          <label className="flex items-center gap-1.5 text-xs text-zinc-400">
+          <label className="flex items-center gap-2 text-xs cursor-pointer" style={{ color: '#9d9da7' }}>
             <input
               type="checkbox"
               checked={p.aq_temporal}

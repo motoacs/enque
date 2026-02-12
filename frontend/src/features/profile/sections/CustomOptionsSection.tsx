@@ -8,7 +8,7 @@ export function CustomOptionsSection() {
 
   return (
     <section>
-      <h3 className="text-xs font-semibold text-zinc-400 uppercase mb-2">
+      <h3 className="section-heading mb-3">
         {t("profile.customOptions")}
       </h3>
       <textarea
@@ -17,9 +17,9 @@ export function CustomOptionsSection() {
         disabled={p.is_preset}
         placeholder="--vpp-nlmeans sigma=0.005 --gop-len 300"
         rows={3}
-        className="w-full bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1.5 border border-zinc-600 disabled:opacity-60 placeholder:text-zinc-600 font-mono resize-y"
+        className="w-full form-input font-mono resize-y leading-relaxed"
       />
-      <p className="text-xs text-zinc-500 mt-1">
+      <p className="text-[10px] mt-1.5 font-mono" style={{ color: '#3c3c48' }}>
         {p.custom_options.length} / 4096
       </p>
     </section>

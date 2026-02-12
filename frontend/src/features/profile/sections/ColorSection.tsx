@@ -24,18 +24,18 @@ export function ColorSection() {
 
   return (
     <section>
-      <h3 className="text-xs font-semibold text-zinc-400 uppercase mb-2">
+      <h3 className="section-heading mb-3">
         {t("profile.color")}
       </h3>
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         {selects.map(({ label, field, opts }) => (
           <div key={field} className="flex items-center gap-2">
-            <label className="text-xs text-zinc-400 w-28 shrink-0">{label}</label>
+            <label className="form-label w-28">{label}</label>
             <select
               value={p[field]}
               onChange={(e) => update({ [field]: e.target.value })}
               disabled={isPreset}
-              className="bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1 border border-zinc-600 disabled:opacity-60"
+              className="form-input"
             >
               {opts.map((v) => (
                 <option key={v} value={v}>{v}</option>

@@ -14,16 +14,19 @@ export function OverallProgress() {
   const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   return (
-    <div className="px-4 py-2 space-y-1">
-      <div className="flex justify-between text-xs text-zinc-400">
-        <span>{t("encode.progress")}</span>
-        <span>
-          {completed} / {total} ({percent}%)
+    <div className="px-5 py-3 space-y-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="flex justify-between items-baseline">
+        <span className="font-display text-xs font-semibold uppercase tracking-wider" style={{ color: '#4ecdc4' }}>
+          {t("encode.progress")}
+        </span>
+        <span className="text-xs font-mono" style={{ color: '#9d9da7' }}>
+          {completed} / {total}
+          <span className="ml-2" style={{ color: '#4ecdc4' }}>{percent}%</span>
         </span>
       </div>
-      <div className="h-2 bg-zinc-700 rounded overflow-hidden">
+      <div className="progress-track" style={{ height: '8px' }}>
         <div
-          className="h-full bg-blue-500 transition-all duration-300"
+          className="progress-fill"
           style={{ width: `${percent}%` }}
         />
       </div>

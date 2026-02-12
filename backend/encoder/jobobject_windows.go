@@ -20,6 +20,7 @@ var (
 const (
 	jobObjectExtendedLimitInformation = 9
 	jOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE = 0x00002000
+	pROCESS_ALL_ACCESS                 = 0x1F0FFF
 )
 
 type jobObjectExtendedLimitInfo struct {
@@ -86,7 +87,7 @@ func (jo *JobObject) AssignProcess(cmd *exec.Cmd) error {
 	}
 
 	processHandle, err := syscall.OpenProcess(
-		syscall.PROCESS_ALL_ACCESS, false, uint32(cmd.Process.Pid))
+		pROCESS_ALL_ACCESS, false, uint32(cmd.Process.Pid))
 	if err != nil {
 		return fmt.Errorf("OpenProcess: %w", err)
 	}

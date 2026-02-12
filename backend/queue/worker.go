@@ -98,7 +98,7 @@ func (w *Worker) executeJob(ctx context.Context, job *QueueJob) {
 		FolderMode:    w.appCfg.OutputFolderMode,
 		FolderPath:    w.appCfg.OutputFolderPath,
 		NameTemplate:  w.appCfg.OutputNameTemplate,
-		Container:     w.appCfg.OutputContainer,
+		Container:     w.prof.OutputContainer,
 		OverwriteMode: w.appCfg.OverwriteMode,
 	}
 

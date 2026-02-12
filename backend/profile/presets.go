@@ -59,6 +59,8 @@ func hevcQuality() Profile {
 		AttachmentCopy:    true,
 		RestoreFileTime:   false,
 
+		OutputContainer: "mp4",
+
 		NVEncCAdvanced: defaultAdvanced(),
 		CustomOptions:  "",
 	}
@@ -106,6 +108,8 @@ func av1Fast() Profile {
 		DataCopy:          true,
 		AttachmentCopy:    true,
 		RestoreFileTime:   false,
+
+		OutputContainer: "mp4",
 
 		NVEncCAdvanced: defaultAdvanced(),
 		CustomOptions:  "",
@@ -155,6 +159,8 @@ func cameraArchive() Profile {
 		AttachmentCopy:    true,
 		RestoreFileTime:   true,
 
+		OutputContainer: "mp4",
+
 		NVEncCAdvanced: defaultAdvanced(),
 		CustomOptions:  "",
 	}
@@ -202,6 +208,8 @@ func h264Compatible() Profile {
 		DataCopy:          true,
 		AttachmentCopy:    true,
 		RestoreFileTime:   false,
+
+		OutputContainer: "mp4",
 
 		NVEncCAdvanced: defaultAdvanced(),
 		CustomOptions:  "",

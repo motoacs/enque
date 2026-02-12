@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import * as api from "@/lib/api";
 
 export interface NVEncCAdvanced {
   interlace: string;
@@ -75,6 +76,7 @@ export interface Profile {
   data_copy: boolean;
   attachment_copy: boolean;
   restore_file_time: boolean;
+  output_container: string;
   nvencc_advanced: NVEncCAdvanced;
   custom_options: string;
 }
@@ -86,26 +88,75 @@ interface ProfileState {
   setEditingProfile: (profile: Profile | null) => void;
   updateEditingProfile: (updates: Partial<Profile>) => void;
   updateAdvanced: (updates: Partial<NVEncCAdvanced>) => void;
+  addProfile: (profile: Profile) => void;
+  removeProfile: (id: string) => void;
+  updateProfileInList: (profile: Profile) => void;
 }
 
-export const useProfileStore = create<ProfileState>((set) => ({
+// Debounced auto-save for user presets
+let saveTimer: ReturnType<typeof setTimeout> | null = null;
+let pendingSaveProfile: Profile | null = null;
+
+function scheduleSave(profile: Profile) {
+  pendingSaveProfile = profile;
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    flushSave();
+  }, 500);
+}
+
+function flushSave() {
+  if (pendingSaveProfile) {
+    api.upsertProfile(pendingSaveProfile).catch((err) => {
+      console.error("Auto-save failed:", err);
+    });
+    pendingSaveProfile = null;
+  }
+  if (saveTimer) {
+    clearTimeout(saveTimer);
+    saveTimer = null;
+  }
+}
+
+export const useProfileStore = create<ProfileState>((set, get) => ({
   profiles: [],
   editingProfile: null,
   setProfiles: (profiles) => set({ profiles }),
-  setEditingProfile: (profile) => set({ editingProfile: profile ? { ...profile } : null }),
+  setEditingProfile: (profile) => {
+    // Flush any pending save for the previous profile before switching
+    const prev = get().editingProfile;
+    if (prev && !prev.is_preset && pendingSaveProfile) {
+      flushSave();
+    }
+    set({ editingProfile: profile ? { ...profile } : null });
+  },
   updateEditingProfile: (updates) =>
-    set((s) => ({
-      editingProfile: s.editingProfile
-        ? { ...s.editingProfile, ...updates }
-        : null,
-    })),
+    set((s) => {
+      if (!s.editingProfile) return {};
+      const updated = { ...s.editingProfile, ...updates };
+      if (!updated.is_preset) {
+        scheduleSave(updated);
+      }
+      return { editingProfile: updated };
+    }),
   updateAdvanced: (updates) =>
+    set((s) => {
+      if (!s.editingProfile) return {};
+      const updated = {
+        ...s.editingProfile,
+        nvencc_advanced: { ...s.editingProfile.nvencc_advanced, ...updates },
+      };
+      if (!updated.is_preset) {
+        scheduleSave(updated);
+      }
+      return { editingProfile: updated };
+    }),
+  addProfile: (profile) =>
+    set((s) => ({ profiles: [...s.profiles, profile] })),
+  removeProfile: (id) =>
+    set((s) => ({ profiles: s.profiles.filter((p) => p.id !== id) })),
+  updateProfileInList: (profile) =>
     set((s) => ({
-      editingProfile: s.editingProfile
-        ? {
-            ...s.editingProfile,
-            nvencc_advanced: { ...s.editingProfile.nvencc_advanced, ...updates },
-          }
-        : null,
+      profiles: s.profiles.map((p) => (p.id === profile.id ? profile : p)),
     })),
 }));

@@ -28,13 +28,17 @@ export function LogViewer({ jobId }: LogViewerProps) {
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className="flex-1 overflow-y-auto bg-zinc-900 p-2 font-mono text-[11px] text-zinc-400 leading-tight"
+      className="flex-1 overflow-y-auto p-3 font-mono text-[11px] leading-relaxed"
+      style={{
+        background: 'rgba(8, 8, 12, 0.6)',
+        color: '#5c5c68',
+      }}
     >
       {logs.length === 0 && (
-        <div className="text-zinc-600 text-center py-4">{t("encode.selectJobForLog")}</div>
+        <div className="text-center py-8" style={{ color: '#3c3c48' }}>{t("encode.selectJobForLog")}</div>
       )}
       {logs.map((line, i) => (
-        <div key={i} className="whitespace-pre-wrap break-all">
+        <div key={i} className="whitespace-pre-wrap break-all hover:bg-white/[0.02] px-1 rounded">
           {line}
         </div>
       ))}

@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { X, Film } from "lucide-react";
 import type { QueueJob } from "@/stores/editStore";
 
 interface QueueItemProps {
@@ -16,16 +16,20 @@ function formatSize(bytes: number): string {
 
 export function QueueItem({ job, onRemove }: QueueItemProps) {
   return (
-    <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-zinc-700/50 group">
+    <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg group transition-colors duration-150 hover:bg-white/[0.03]">
+      <Film size={13} style={{ color: '#5c5c68', flexShrink: 0 }} />
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-zinc-200 truncate">{job.fileName}</p>
-        <p className="text-xs text-zinc-500">{formatSize(job.inputSizeBytes)}</p>
+        <p className="text-xs truncate" style={{ color: '#e8e6e3' }}>{job.fileName}</p>
+        {job.inputSizeBytes > 0 && (
+          <p className="text-[10px] font-mono" style={{ color: '#5c5c68' }}>{formatSize(job.inputSizeBytes)}</p>
+        )}
       </div>
       <button
         onClick={() => onRemove(job.jobId)}
-        className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-zinc-600 text-zinc-400 hover:text-zinc-200 transition-all"
+        className="opacity-0 group-hover:opacity-100 p-1 rounded-md transition-all duration-150 hover:bg-white/[0.06]"
+        style={{ color: '#5c5c68' }}
       >
-        <X size={14} />
+        <X size={12} />
       </button>
     </div>
   );

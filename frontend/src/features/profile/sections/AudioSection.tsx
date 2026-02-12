@@ -10,17 +10,17 @@ export function AudioSection() {
 
   return (
     <section>
-      <h3 className="text-xs font-semibold text-zinc-400 uppercase mb-2">
+      <h3 className="section-heading mb-3">
         {t("profile.audio")}
       </h3>
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         <div className="flex items-center gap-2">
-          <label className="text-xs text-zinc-400 w-28 shrink-0">Audio Mode</label>
+          <label className="form-label w-28">Audio Mode</label>
           <select
             value={p.audio_mode}
             onChange={(e) => update({ audio_mode: e.target.value })}
             disabled={isPreset}
-            className="bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1 border border-zinc-600 disabled:opacity-60"
+            className="form-input"
           >
             <option value="copy">Copy</option>
             <option value="aac">AAC</option>
@@ -30,7 +30,7 @@ export function AudioSection() {
 
         {p.audio_mode !== "copy" && (
           <div className="flex items-center gap-2">
-            <label className="text-xs text-zinc-400 w-28 shrink-0">Bitrate (kbps)</label>
+            <label className="form-label w-28">Bitrate (kbps)</label>
             <input
               type="number"
               value={p.audio_bitrate}
@@ -38,7 +38,7 @@ export function AudioSection() {
               disabled={isPreset}
               min={32}
               max={1024}
-              className="w-24 bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1 border border-zinc-600 disabled:opacity-60"
+              className="w-24 form-input font-mono"
             />
           </div>
         )}

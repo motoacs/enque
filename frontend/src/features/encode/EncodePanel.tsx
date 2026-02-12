@@ -62,9 +62,9 @@ export function EncodePanel() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Left: job list */}
-        <div className="w-64 border-r border-zinc-700 flex flex-col overflow-hidden">
-          <div className="px-3 py-2 border-b border-zinc-700">
-            <h3 className="text-xs font-semibold text-zinc-400 uppercase">
+        <div className="w-64 flex flex-col overflow-hidden" style={{ borderRight: '1px solid rgba(255,255,255,0.06)', background: 'rgba(18, 18, 26, 0.3)' }}>
+          <div className="px-4 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <h3 className="font-display text-xs font-semibold uppercase tracking-wider" style={{ color: '#9d9da7' }}>
               {t("encode.jobs")}
             </h3>
           </div>
@@ -76,15 +76,15 @@ export function EncodePanel() {
 
         {/* Right: log viewer */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="px-3 py-2 border-b border-zinc-700">
-            <h3 className="text-xs font-semibold text-zinc-400 uppercase">
+          <div className="px-4 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <h3 className="font-display text-xs font-semibold uppercase tracking-wider" style={{ color: '#9d9da7' }}>
               {t("encode.log")}
             </h3>
           </div>
           {selectedJobId ? (
             <LogViewer jobId={selectedJobId} />
           ) : (
-            <div className="flex-1 flex items-center justify-center text-xs text-zinc-600">
+            <div className="flex-1 flex items-center justify-center text-xs" style={{ color: '#3c3c48' }}>
               {t("encode.selectJobForLog")}
             </div>
           )}

@@ -56,6 +56,9 @@ type Profile struct {
 	// Advanced NVEncC options
 	NVEncCAdvanced NVEncCAdvanced `json:"nvencc_advanced"`
 
+	// Output
+	OutputContainer string `json:"output_container"`
+
 	// Custom options (layer 2)
 	CustomOptions string `json:"custom_options"`
 }

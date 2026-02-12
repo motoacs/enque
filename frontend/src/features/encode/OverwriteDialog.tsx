@@ -12,35 +12,37 @@ export function OverwriteDialog({ outputPath, onOverwrite, onSkip, onAbort }: Ov
   const { t } = useTranslation();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-zinc-800 rounded-lg shadow-xl w-[450px] border border-zinc-700">
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-700">
-          <AlertTriangle size={16} className="text-yellow-400" />
-          <h2 className="text-sm font-semibold text-zinc-200">{t("encode.overwriteTitle")}</h2>
+    <div className="dialog-overlay">
+      <div className="dialog-panel w-[480px]">
+        <div className="dialog-header">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle size={16} style={{ color: '#fbbf24' }} />
+            <h2 className="text-sm font-display font-semibold" style={{ color: '#e8e6e3' }}>
+              {t("encode.overwriteTitle")}
+            </h2>
+          </div>
         </div>
-        <div className="p-4">
-          <p className="text-xs text-zinc-300 mb-2">{t("encode.overwriteMsg")}</p>
-          <p className="text-xs text-zinc-400 font-mono bg-zinc-900 p-2 rounded break-all">
+        <div className="p-5">
+          <p className="text-xs mb-3" style={{ color: '#9d9da7' }}>{t("encode.overwriteMsg")}</p>
+          <p
+            className="text-xs font-mono rounded-lg p-3 break-all"
+            style={{
+              background: 'rgba(10, 10, 15, 0.8)',
+              color: '#9d9da7',
+              border: '1px solid rgba(255,255,255,0.04)',
+            }}
+          >
             {outputPath}
           </p>
         </div>
-        <div className="px-4 py-3 border-t border-zinc-700 flex justify-end gap-2">
-          <button
-            onClick={onAbort}
-            className="px-3 py-1.5 text-xs bg-red-600 hover:bg-red-500 text-white rounded transition-colors"
-          >
+        <div className="dialog-footer">
+          <button onClick={onAbort} className="btn-danger">
             {t("encode.abort")}
           </button>
-          <button
-            onClick={onSkip}
-            className="px-3 py-1.5 text-xs bg-zinc-600 hover:bg-zinc-500 text-zinc-200 rounded transition-colors"
-          >
+          <button onClick={onSkip} className="btn-secondary">
             {t("encode.skipFile")}
           </button>
-          <button
-            onClick={onOverwrite}
-            className="px-3 py-1.5 text-xs bg-yellow-600 hover:bg-yellow-500 text-white rounded transition-colors"
-          >
+          <button onClick={onOverwrite} className="btn-warning">
             {t("encode.overwrite")}
           </button>
         </div>

@@ -13,79 +13,78 @@ export function SessionSummary({ summary, onDismiss }: SessionSummaryProps) {
   const isSuccess = summary.failedJobs === 0 && summary.timeoutJobs === 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-zinc-800 rounded-lg shadow-xl w-[400px] border border-zinc-700">
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-700">
-          {isSuccess ? (
-            <CheckCircle size={16} className="text-green-400" />
-          ) : (
-            <AlertTriangle size={16} className="text-yellow-400" />
-          )}
-          <h2 className="text-sm font-semibold text-zinc-200">
-            {t("encode.sessionComplete")}
-          </h2>
+    <div className="dialog-overlay">
+      <div className="dialog-panel w-[420px]">
+        <div className="dialog-header">
+          <div className="flex items-center gap-2.5">
+            {isSuccess ? (
+              <CheckCircle size={16} style={{ color: '#34d399' }} />
+            ) : (
+              <AlertTriangle size={16} style={{ color: '#fbbf24' }} />
+            )}
+            <h2 className="text-sm font-display font-semibold" style={{ color: '#e8e6e3' }}>
+              {t("encode.sessionComplete")}
+            </h2>
+          </div>
         </div>
 
-        <div className="p-4 space-y-2">
+        <div className="p-5 space-y-2.5">
           <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="flex items-center gap-1.5 text-zinc-400">
-              <span>{t("encode.totalJobs")}:</span>
+            <div style={{ color: '#9d9da7' }}>
+              {t("encode.totalJobs")}:
             </div>
-            <div className="text-zinc-200">{summary.totalJobs}</div>
+            <div className="font-mono" style={{ color: '#e8e6e3' }}>{summary.totalJobs}</div>
 
-            <div className="flex items-center gap-1.5 text-green-400">
-              <CheckCircle size={12} />
-              <span>{t("encode.completed")}:</span>
+            <div className="flex items-center gap-1.5" style={{ color: '#34d399' }}>
+              <CheckCircle size={11} />
+              {t("encode.completed")}:
             </div>
-            <div className="text-zinc-200">{summary.completedJobs}</div>
+            <div className="font-mono" style={{ color: '#e8e6e3' }}>{summary.completedJobs}</div>
 
             {summary.failedJobs > 0 && (
               <>
-                <div className="flex items-center gap-1.5 text-red-400">
-                  <XCircle size={12} />
-                  <span>{t("encode.failed")}:</span>
+                <div className="flex items-center gap-1.5" style={{ color: '#f87171' }}>
+                  <XCircle size={11} />
+                  {t("encode.failed")}:
                 </div>
-                <div className="text-zinc-200">{summary.failedJobs}</div>
+                <div className="font-mono" style={{ color: '#e8e6e3' }}>{summary.failedJobs}</div>
               </>
             )}
 
             {summary.cancelledJobs > 0 && (
               <>
-                <div className="flex items-center gap-1.5 text-yellow-400">
-                  <MinusCircle size={12} />
-                  <span>{t("encode.cancelled")}:</span>
+                <div className="flex items-center gap-1.5" style={{ color: '#fbbf24' }}>
+                  <MinusCircle size={11} />
+                  {t("encode.cancelled")}:
                 </div>
-                <div className="text-zinc-200">{summary.cancelledJobs}</div>
+                <div className="font-mono" style={{ color: '#e8e6e3' }}>{summary.cancelledJobs}</div>
               </>
             )}
 
             {summary.timeoutJobs > 0 && (
               <>
-                <div className="flex items-center gap-1.5 text-orange-400">
-                  <Clock size={12} />
-                  <span>{t("encode.timedOut")}:</span>
+                <div className="flex items-center gap-1.5" style={{ color: '#fb923c' }}>
+                  <Clock size={11} />
+                  {t("encode.timedOut")}:
                 </div>
-                <div className="text-zinc-200">{summary.timeoutJobs}</div>
+                <div className="font-mono" style={{ color: '#e8e6e3' }}>{summary.timeoutJobs}</div>
               </>
             )}
 
             {summary.skippedJobs > 0 && (
               <>
-                <div className="flex items-center gap-1.5 text-zinc-500">
-                  <MinusCircle size={12} />
-                  <span>{t("encode.skipped")}:</span>
+                <div className="flex items-center gap-1.5" style={{ color: '#5c5c68' }}>
+                  <MinusCircle size={11} />
+                  {t("encode.skipped")}:
                 </div>
-                <div className="text-zinc-200">{summary.skippedJobs}</div>
+                <div className="font-mono" style={{ color: '#e8e6e3' }}>{summary.skippedJobs}</div>
               </>
             )}
           </div>
         </div>
 
-        <div className="px-4 py-3 border-t border-zinc-700 flex justify-end">
-          <button
-            onClick={onDismiss}
-            className="px-4 py-1.5 text-xs bg-blue-600 hover:bg-blue-500 text-white rounded transition-colors"
-          >
+        <div className="dialog-footer">
+          <button onClick={onDismiss} className="btn-primary">
             {t("common.close")}
           </button>
         </div>

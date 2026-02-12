@@ -1,5 +1,7 @@
-import { useCallback, useState, type DragEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { Film } from "lucide-react";
+import { OnFileDrop, OnFileDropOff } from "../../../wailsjs/runtime/runtime";
 
 interface DropZoneProps {
   onFilesDropped: (paths: string[]) => void;
@@ -9,49 +11,73 @@ interface DropZoneProps {
 export function DropZone({ onFilesDropped, children }: DropZoneProps) {
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
+  const dragCounter = useRef(0);
+  const callbackRef = useRef(onFilesDropped);
+  callbackRef.current = onFilesDropped;
 
-  const handleDragOver = useCallback((e: DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  }, []);
-
-  const handleDrop = useCallback(
-    (e: DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+  // Register Wails native file drop handler for actual file paths
+  useEffect(() => {
+    OnFileDrop((_x: number, _y: number, paths: string[]) => {
+      dragCounter.current = 0;
       setIsDragging(false);
-
-      const files = e.dataTransfer?.files;
-      if (files && files.length > 0) {
-        const paths: string[] = [];
-        for (let i = 0; i < files.length; i++) {
-          // Wails provides the full path via webkitRelativePath or name
-          const f = files[i] as File & { path?: string };
-          paths.push(f.path || f.name);
-        }
-        onFilesDropped(paths);
+      if (paths && paths.length > 0) {
+        callbackRef.current(paths);
       }
-    },
-    [onFilesDropped]
-  );
+    }, true);
+
+    return () => {
+      OnFileDropOff();
+    };
+  }, []);
+
+  // Visual feedback via HTML5 drag events with counter to prevent flicker
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current++;
+    if (dragCounter.current === 1) {
+      setIsDragging(true);
+    }
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current--;
+    if (dragCounter.current <= 0) {
+      dragCounter.current = 0;
+      setIsDragging(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current = 0;
+    setIsDragging(false);
+    // Actual file handling is done by Wails OnFileDrop callback
+  }, []);
 
   return (
     <div
+      onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className="relative h-full"
+      style={{ "--wails-drop-target": "drop" } as React.CSSProperties}
     >
       {isDragging && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-blue-600/20 border-2 border-dashed border-blue-500 rounded-lg">
-          <p className="text-blue-400 font-medium text-lg">
+        <div
+          className="absolute inset-1 z-10 flex flex-col items-center justify-center gap-3 rounded-xl animate-fade-in pointer-events-none"
+          style={{
+            background: 'rgba(232, 168, 73, 0.06)',
+            border: '2px dashed rgba(232, 168, 73, 0.35)',
+          }}
+        >
+          <Film size={28} style={{ color: '#e8a849', opacity: 0.7 }} />
+          <p className="font-display text-sm font-semibold" style={{ color: '#e8a849' }}>
             {t("queue.dropHere")}
           </p>
         </div>

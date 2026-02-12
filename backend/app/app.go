@@ -4,7 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
+
+	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"github.com/yuta/enque/backend/config"
 	"github.com/yuta/enque/backend/detector"
@@ -77,6 +81,30 @@ func (a *App) Bootstrap() (*BootstrapResult, error) {
 	profiles := a.profileMgr.List()
 	tools := detector.DetectAll(cfg)
 	tempArtifacts := a.queueMgr.ListTempArtifacts()
+
+	// Auto-populate empty config paths with detected tool paths
+	updated := false
+	if cfg.NVEncCPath == "" && tools.NVEncC.Found {
+		cfg.NVEncCPath = tools.NVEncC.Path
+		updated = true
+	}
+	if cfg.QSVEncPath == "" && tools.QSVEncC.Found {
+		cfg.QSVEncPath = tools.QSVEncC.Path
+		updated = true
+	}
+	if cfg.FFmpegPath == "" && tools.FFmpeg.Found {
+		cfg.FFmpegPath = tools.FFmpeg.Path
+		updated = true
+	}
+	if cfg.FFprobePath == "" && tools.FFprobe.Found {
+		cfg.FFprobePath = tools.FFprobe.Path
+		updated = true
+	}
+	if updated {
+		if err := a.configMgr.Save(cfg); err != nil {
+			fmt.Printf("warning: failed to save auto-detected tool paths: %v\n", err)
+		}
+	}
 
 	return &BootstrapResult{
 		Config:        cfg,
@@ -197,6 +225,60 @@ func (a *App) ListTempArtifacts() ([]string, error) {
 // CleanupTempArtifacts deletes specified temp files.
 func (a *App) CleanupTempArtifacts(paths []string) error {
 	return a.queueMgr.CleanupTempArtifacts(paths)
+}
+
+// --- File Dialogs ---
+
+// OpenFileDialog opens a file picker dialog and returns selected file paths.
+func (a *App) OpenFileDialog() ([]string, error) {
+	return wailsruntime.OpenMultipleFilesDialog(a.ctx, wailsruntime.OpenDialogOptions{
+		Title: "Select video files",
+		Filters: []wailsruntime.FileFilter{
+			{
+				DisplayName: "Video Files (*.mp4;*.mkv;*.avi;*.mov;*.ts;*.m2ts;*.webm)",
+				Pattern:     "*.mp4;*.mkv;*.avi;*.mov;*.ts;*.m2ts;*.webm;*.wmv;*.flv",
+			},
+			{
+				DisplayName: "All Files (*.*)",
+				Pattern:     "*.*",
+			},
+		},
+	})
+}
+
+// OpenDirectoryDialog opens a folder picker and returns video files found in it.
+func (a *App) OpenDirectoryDialog() ([]string, error) {
+	dir, err := wailsruntime.OpenDirectoryDialog(a.ctx, wailsruntime.OpenDialogOptions{
+		Title: "Select folder containing video files",
+	})
+	if err != nil {
+		return nil, err
+	}
+	if dir == "" {
+		return nil, nil
+	}
+
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	videoExts := map[string]bool{
+		".mp4": true, ".mkv": true, ".avi": true, ".mov": true,
+		".ts": true, ".m2ts": true, ".webm": true, ".wmv": true, ".flv": true,
+	}
+
+	var paths []string
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		ext := strings.ToLower(filepath.Ext(e.Name()))
+		if videoExts[ext] {
+			paths = append(paths, filepath.Join(dir, e.Name()))
+		}
+	}
+	return paths, nil
 }
 
 // --- Command Preview ---

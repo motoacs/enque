@@ -22,6 +22,7 @@ function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [tempFiles, setTempFiles] = useState<string[]>([]);
   const [tempDialogOpen, setTempDialogOpen] = useState(false);
+  const [encodeError, setEncodeError] = useState<string | null>(null);
   const sessionState = useEncodeStore((s) => s.sessionState);
   const jobs = useEditStore((s) => s.jobs);
   const outputSettings = useEditStore((s) => s.outputSettings);
@@ -31,6 +32,7 @@ function App() {
   const setTools = useAppStore((s) => s.setTools);
   const setProfiles = useProfileStore((s) => s.setProfiles);
   const setEditingProfile = useProfileStore((s) => s.setEditingProfile);
+  const setSelectedProfileId = useEditStore((s) => s.setSelectedProfileId);
   const setOutputSettings = useEditStore((s) => s.setOutputSettings);
 
   useEffect(() => {
@@ -39,39 +41,36 @@ function App() {
     api.bootstrap().then((result: any) => {
       if (!result) return;
 
-      // Set stores from bootstrap data
       if (result.config) {
         setConfig(result.config);
         i18n.changeLanguage(result.config.language || "ja");
 
-        // Reflect output defaults from config
         setOutputSettings({
           outputFolderMode: result.config.output_folder_mode,
           outputFolderPath: result.config.output_folder_path,
           outputNameTemplate: result.config.output_name_template,
-          outputContainer: result.config.output_container,
           overwriteMode: result.config.overwrite_mode,
         });
       }
       if (result.profiles) {
         setProfiles(result.profiles);
-        // Select default profile if configured
         if (result.config?.default_profile_id) {
           const defaultProfile = result.profiles.find(
             (p: any) => p.id === result.config.default_profile_id
           );
           if (defaultProfile) {
             setEditingProfile(defaultProfile);
+            setSelectedProfileId(defaultProfile.id);
           }
         } else if (result.profiles.length > 0) {
           setEditingProfile(result.profiles[0]);
+          setSelectedProfileId(result.profiles[0].id);
         }
       }
       if (result.tools) {
         setTools(result.tools);
       }
 
-      // Show temp cleanup dialog if there are leftover temp files
       if (result.temp_artifacts && result.temp_artifacts.length > 0) {
         setTempFiles(result.temp_artifacts);
         setTempDialogOpen(true);
@@ -105,40 +104,40 @@ function App() {
         output_folder_mode: outputSettings.outputFolderMode,
         output_folder_path: outputSettings.outputFolderPath,
         output_name_template: outputSettings.outputNameTemplate,
-        output_container: outputSettings.outputContainer,
         overwrite_mode: outputSettings.overwriteMode,
         nvencc_path: config.nvencc_path,
       },
     };
 
     try {
+      setEncodeError(null);
       await api.startEncode(request);
-    } catch (err) {
-      console.error("Failed to start encode:", err);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("Failed to start encode:", msg);
+      setEncodeError(msg);
     }
   };
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-900 text-zinc-100">
+    <div className="flex flex-col h-screen font-body" style={{ background: '#0a0a0f' }}>
       <TopBar onSettingsClick={() => setSettingsOpen(true)} />
 
       <main className="flex-1 flex overflow-hidden">
         {isEncoding || sessionState === "completed" || sessionState === "aborted" ? (
-          /* Encode monitoring view */
           <div className="flex-1 flex flex-col overflow-hidden">
             <EncodePanel />
           </div>
         ) : (
-          /* Normal editing view */
           <>
             {/* Left panel: Queue */}
-            <div className="w-72 border-r border-zinc-700 flex flex-col">
+            <div className="w-72 flex flex-col" style={{ borderRight: '1px solid rgba(255,255,255,0.06)', background: 'rgba(18, 18, 26, 0.5)' }}>
               <QueuePanel />
             </div>
 
-            {/* Center panel: Profile Editor */}
+            {/* Center panel: Profile Editor + Output + Preview */}
             <div className="flex-1 flex flex-col overflow-hidden">
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto min-h-0">
                 <ProfileEditor />
               </div>
               <OutputSettingsPanel />
@@ -148,22 +147,32 @@ function App() {
         )}
       </main>
 
-      {/* Bottom bar: Encode controls */}
+      {/* Bottom bar: Encode start */}
       {!isEncoding && sessionState === "idle" && (
-        <footer className="px-4 py-2 border-t border-zinc-700 bg-zinc-800 flex items-center justify-between shrink-0">
-          <div className="text-xs text-zinc-500">
-            {jobs.length > 0
-              ? t("queue.items", { count: jobs.length })
-              : ""}
+        <footer className="shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(18, 18, 26, 0.5)' }}>
+          {encodeError && (
+            <div
+              className="px-5 py-2 text-xs"
+              style={{ color: '#fbbf24', background: 'rgba(251, 191, 36, 0.08)', borderBottom: '1px solid rgba(251, 191, 36, 0.15)' }}
+            >
+              {t("encode.startFailed", { error: encodeError })}
+            </div>
+          )}
+          <div className="px-5 py-3 flex items-center justify-between">
+            <div className="text-xs font-mono" style={{ color: '#5c5c68' }}>
+              {jobs.length > 0
+                ? t("queue.items", { count: jobs.length })
+                : ""}
+            </div>
+            <button
+              onClick={handleStartEncode}
+              disabled={!canStart}
+              className={`btn-primary ${canStart ? 'animate-pulse-glow' : ''}`}
+            >
+              <Play size={14} />
+              {t("encode.start")}
+            </button>
           </div>
-          <button
-            onClick={handleStartEncode}
-            disabled={!canStart}
-            className="flex items-center gap-2 px-4 py-1.5 rounded bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium transition-colors"
-          >
-            <Play size={14} />
-            {t("encode.start")}
-          </button>
         </footer>
       )}
 

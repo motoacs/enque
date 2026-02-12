@@ -19,32 +19,34 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-zinc-800 rounded-lg shadow-xl w-[500px] max-h-[80vh] flex flex-col border border-zinc-700">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-700">
-          <h2 className="text-sm font-semibold text-zinc-200">{t("settings.title")}</h2>
-          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-200">
-            <X size={16} />
+    <div className="dialog-overlay">
+      <div className="dialog-panel w-[520px] max-h-[80vh]">
+        <div className="dialog-header">
+          <h2 className="text-sm font-display font-semibold" style={{ color: '#e8e6e3' }}>
+            {t("settings.title")}
+          </h2>
+          <button onClick={onClose} className="icon-btn">
+            <X size={15} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-5 space-y-6">
           {/* Tool Paths */}
           <section>
-            <h3 className="text-xs font-semibold text-zinc-400 uppercase mb-2">{t("settings.tools")}</h3>
+            <h3 className="section-heading mb-3">{t("settings.tools")}</h3>
             {([
               ["nvencc_path", t("settings.nvenccPath")] as const,
               ["qsvenc_path", t("settings.qsvencPath")] as const,
               ["ffmpeg_path", t("settings.ffmpegPath")] as const,
               ["ffprobe_path", t("settings.ffprobePath")] as const,
             ] as const).map(([field, label]) => (
-              <div key={field} className="flex items-center gap-2 mb-2">
-                <label className="text-xs text-zinc-400 w-28 shrink-0">{label}</label>
+              <div key={field} className="flex items-center gap-2 mb-2.5">
+                <label className="form-label w-28">{label}</label>
                 <input
                   type="text"
                   value={config[field]}
                   onChange={(e) => updateConfig({ [field]: e.target.value })}
-                  className="flex-1 bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1 border border-zinc-600"
+                  className="flex-1 form-input font-mono"
                 />
               </div>
             ))}
@@ -52,33 +54,33 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
 
           {/* Execution */}
           <section>
-            <h3 className="text-xs font-semibold text-zinc-400 uppercase mb-2">{t("settings.execution")}</h3>
-            <div className="space-y-2">
+            <h3 className="section-heading mb-3">{t("settings.execution")}</h3>
+            <div className="space-y-2.5">
               <div className="flex items-center gap-2">
-                <label className="text-xs text-zinc-400 w-28 shrink-0">{t("settings.maxJobs")}</label>
+                <label className="form-label w-28">{t("settings.maxJobs")}</label>
                 <input
                   type="number"
                   value={config.max_concurrent_jobs}
                   onChange={(e) => updateConfig({ max_concurrent_jobs: Number(e.target.value) })}
                   min={1}
                   max={8}
-                  className="w-16 bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1 border border-zinc-600"
+                  className="w-16 form-input font-mono"
                 />
               </div>
 
               <div className="flex items-center gap-2">
-                <label className="text-xs text-zinc-400 w-28 shrink-0">{t("settings.onError")}</label>
+                <label className="form-label w-28">{t("settings.onError")}</label>
                 <select
                   value={config.on_error}
                   onChange={(e) => updateConfig({ on_error: e.target.value })}
-                  className="bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1 border border-zinc-600"
+                  className="form-input"
                 >
                   <option value="skip">{t("settings.skip")}</option>
                   <option value="stop">{t("settings.stop")}</option>
                 </select>
               </div>
 
-              <label className="flex items-center gap-2 text-xs text-zinc-400">
+              <label className="flex items-center gap-2 text-xs cursor-pointer" style={{ color: '#9d9da7' }}>
                 <input
                   type="checkbox"
                   checked={config.decoder_fallback}
@@ -87,7 +89,7 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                 {t("settings.decoderFallback")}
               </label>
 
-              <label className="flex items-center gap-2 text-xs text-zinc-400">
+              <label className="flex items-center gap-2 text-xs cursor-pointer" style={{ color: '#9d9da7' }}>
                 <input
                   type="checkbox"
                   checked={config.keep_failed_temp}
@@ -97,26 +99,26 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
               </label>
 
               <div className="flex items-center gap-2">
-                <label className="text-xs text-zinc-400 w-28 shrink-0">{t("settings.noOutputTimeout")}</label>
+                <label className="form-label w-28">{t("settings.noOutputTimeout")}</label>
                 <input
                   type="number"
                   value={config.no_output_timeout_sec}
                   onChange={(e) => updateConfig({ no_output_timeout_sec: Number(e.target.value) })}
                   min={30}
                   max={86400}
-                  className="w-20 bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1 border border-zinc-600"
+                  className="w-20 form-input font-mono"
                 />
               </div>
 
               <div className="flex items-center gap-2">
-                <label className="text-xs text-zinc-400 w-28 shrink-0">{t("settings.noProgressTimeout")}</label>
+                <label className="form-label w-28">{t("settings.noProgressTimeout")}</label>
                 <input
                   type="number"
                   value={config.no_progress_timeout_sec}
                   onChange={(e) => updateConfig({ no_progress_timeout_sec: Number(e.target.value) })}
                   min={30}
                   max={86400}
-                  className="w-20 bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1 border border-zinc-600"
+                  className="w-20 form-input font-mono"
                 />
               </div>
             </div>
@@ -124,11 +126,11 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
 
           {/* Post Action */}
           <section>
-            <h3 className="text-xs font-semibold text-zinc-400 uppercase mb-2">{t("settings.postAction")}</h3>
+            <h3 className="section-heading mb-3">{t("settings.postAction")}</h3>
             <select
               value={config.post_complete_action}
               onChange={(e) => updateConfig({ post_complete_action: e.target.value })}
-              className="bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1 border border-zinc-600 mb-2"
+              className="form-input mb-2.5"
             >
               <option value="none">{t("settings.none")}</option>
               <option value="shutdown">{t("settings.shutdown")}</option>
@@ -141,18 +143,18 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                 value={config.post_complete_command}
                 onChange={(e) => updateConfig({ post_complete_command: e.target.value })}
                 placeholder="command..."
-                className="w-full bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1 border border-zinc-600 font-mono"
+                className="w-full form-input font-mono"
               />
             )}
           </section>
 
           {/* Language */}
           <section>
-            <h3 className="text-xs font-semibold text-zinc-400 uppercase mb-2">{t("settings.language")}</h3>
+            <h3 className="section-heading mb-3">{t("settings.language")}</h3>
             <select
               value={config.language}
               onChange={(e) => handleLanguageChange(e.target.value)}
-              className="bg-zinc-700 text-zinc-200 text-xs rounded px-2 py-1 border border-zinc-600"
+              className="form-input"
             >
               <option value="ja">日本語</option>
               <option value="en">English</option>
@@ -160,11 +162,8 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
           </section>
         </div>
 
-        <div className="px-4 py-3 border-t border-zinc-700 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-4 py-1.5 text-xs bg-zinc-600 hover:bg-zinc-500 text-zinc-200 rounded transition-colors"
-          >
+        <div className="dialog-footer">
+          <button onClick={onClose} className="btn-secondary">
             {t("common.close")}
           </button>
         </div>

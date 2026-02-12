@@ -26,6 +26,10 @@ func main() {
 		BackgroundColour: &options.RGBA{R: 24, G: 24, B: 27, A: 1},
 		OnStartup:        a.Startup,
 		OnShutdown:       a.Shutdown,
+		DragAndDrop: &options.DragAndDrop{
+			EnableFileDrop:     true,
+			DisableWebViewDrop: true,
+		},
 		Bind: []interface{}{
 			a,
 		},

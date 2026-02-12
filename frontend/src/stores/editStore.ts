@@ -11,7 +11,6 @@ export interface OutputSettings {
   outputFolderMode: string;
   outputFolderPath: string;
   outputNameTemplate: string;
-  outputContainer: string;
   overwriteMode: string;
 }
 
@@ -34,7 +33,6 @@ export const useEditStore = create<EditState>((set) => ({
     outputFolderMode: "same_as_input",
     outputFolderPath: "",
     outputNameTemplate: "{name}_encoded.{ext}",
-    outputContainer: "mkv",
     overwriteMode: "ask",
   },
   addJobs: (newJobs) => set((s) => ({ jobs: [...s.jobs, ...newJobs] })),

@@ -74,3 +74,11 @@ export async function cleanupTempArtifacts(paths: string[]): Promise<void> {
 export async function getCommandPreview(profile: unknown, inputPath: string, outputPath: string): Promise<string> {
   return getApp().GetCommandPreview(JSON.stringify(profile), inputPath, outputPath);
 }
+
+export async function openFileDialog(): Promise<string[]> {
+  return getApp().OpenFileDialog();
+}
+
+export async function openDirectoryDialog(): Promise<string[]> {
+  return getApp().OpenDirectoryDialog();
+}
