@@ -38,4 +38,7 @@ docs/NVEncC_Options.en.md
 # Wails
 build/bin/
 frontend/dist/
+!frontend/dist/
+frontend/dist/*
+!frontend/dist/.keep
 frontend/node_modules/
