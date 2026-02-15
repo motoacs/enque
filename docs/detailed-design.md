@@ -1,6 +1,6 @@
 # Enque 詳細設計書（SSOT）
 
-document version: v1.2
+document version: v1.3
 
 ## 0. 文書情報
 
@@ -10,7 +10,7 @@ document version: v1.2
 | 文書名 | Enque 詳細設計書（Single Source of Truth） |
 | 対象計画書 | `docs/project-plan.md`（Enque プロジェクト計画書 v4.3） |
 | 対象バージョン | Enque v1.0.0（NVEncC実装 + マルチエンコーダ拡張基盤） |
-| 最終更新 | 2026-02-11 |
+| 最終更新 | 2026-02-16 |
 | 対象環境 | Windows 11 (x64), NVEncC 8.x 以降（QSVEncC/ffmpeg拡張を考慮） |
 
 ## 1. SSOT運用ルール
@@ -31,7 +31,7 @@ document version: v1.2
 
 - 複数動画の一括エンコード
 - GUI設定 + カスタムオプションの両立
-- 進捗監視、停止/中止/キャンセル制御
+- 進捗監視、停止/中止/ジョブ個別スキップ制御
 - ファイル日時復元を含むメタデータ保持
 - 実行再現性を担保するジョブ記録（`job.json` + stderrログ）
 - 将来のQSVEncC/ffmpeg対応でコア再利用できる拡張基盤
@@ -396,8 +396,9 @@ frontend/
 | `GetGPUInfo()` | `--check-device`, `--check-features` 結果取得 |
 | `DetectExternalTools()` | NVEncC/QSVEncC/ffmpeg/ffprobe 検出 |
 | `StartEncode(request)` | セッション開始 |
-| `RequestGracefulStop(sessionID)` | 停止（次ジョブ抑止） |
-| `RequestAbort(sessionID)` | 中止（実行中含め強制終了） |
+| `RequestGracefulStop(sessionID)` | 停止（次ジョブ抑止、UIラベル: 残りをスキップ） |
+| `RequestAbort(sessionID)` | 中止（実行中含め強制終了、UIラベル: すべて強制終了） |
+| `SkipJob(sessionID, jobID)` | 待機中ジョブの個別スキップ |
 | `CancelJob(sessionID, jobID)` | 実行中ジョブの個別中止 |
 | `ResolveOverwrite(sessionID, jobID, decision)` | `overwrite_mode=ask` 応答 |
 | `ListTempArtifacts()` | 残存 tmp 候補一覧取得 |
@@ -479,6 +480,18 @@ frontend/
 8. 設定ダイアログ（外部ツール、同時実行数、エラー時挙動）
 9. GPU情報ダイアログ（v1: NVEncC）
 
+### 8.2.1 エンコード中のジョブリスト
+
+エンコード開始時に、フロントエンドは全ジョブを `status=pending` で `encodeStore.jobProgress` に初期登録する（`initPendingJobs` アクション）。これにより、まだバックエンドが処理を開始していないジョブも含めて全件がジョブリストに表示される。
+
+- **pending**: 時計アイコン、灰色。ホバー時に X ボタンを表示し、クリックで `SkipJob` APIを呼びスキップ可能
+- **running**: スピナーアイコン、シアン。進捗%、fps、ビットレート、ETA表示
+- **completed**: チェックマーク、緑
+- **failed**: Xマーク、赤。エラーメッセージ表示
+- **skipped**: マイナスマーク、灰色
+- **cancelled**: マイナスマーク、黄色
+- **timeout**: 三角マーク、オレンジ
+
 ## 8.3 UI状態遷移
 
 | 現在状態 | イベント | 次状態 |
@@ -491,9 +504,10 @@ frontend/
 
 ルール:
 
-- `running` 中はキュー編集をロック
-- 停止は次ジョブ開始を抑止
-- 中止は実行中ジョブを強制終了
+- `running` 中はキュー編集をロック（ただし待機中ジョブの個別スキップは可能）
+- 停止（UIラベル: 「残りをスキップ」）は次ジョブ開始を抑止し、実行中ジョブは完了まで走る
+- 中止（UIラベル: 「すべて強制終了」）は実行中ジョブを含め即座に強制終了する
+- 両ボタンにはツールチップで動作の詳細説明を表示する
 
 ## 8.4 コマンドプレビュー
 
@@ -508,7 +522,7 @@ frontend/
 ### 9.1.1 主要構造体
 
 - `Manager`
-- `Session`
+- `Session` — `SkipSet map[string]bool` を保持し、個別ジョブのスキップ要求を管理
 - `Worker`
 - `JobRuntime`
 
@@ -518,7 +532,7 @@ frontend/
 StartEncode(request):
   validate(request)
   adapter = registry.resolve(request.profile.encoder_type)
-  session = newSession(snapshot)
+  session = newSession(snapshot)  // SkipSet = make(map[string]bool) で初期化
   emit(session_started)
   spawn workers(max_concurrent_jobs)
   enqueue all pending jobs
@@ -531,9 +545,17 @@ Worker:
 
 ```go
 for job in queue:
-  if session.stopRequested { mark skipped; continue }
+  if session.stopRequested || session.shouldSkipJob(job.id) { mark skipped; continue }
   runJob(job)
   if failed && on_error == stop { session.stopRequested = true }
+```
+
+SkipJob（個別スキップ）:
+
+```go
+SkipJob(sessionID, jobID):
+  session.skipSet[jobID] = true
+  // ワーカーが次にこのジョブを取り出した際にスキップされる
 ```
 
 ## 9.2 出力パス確定
@@ -755,6 +777,14 @@ v1では上記2種類のみを正式サポートする。未知変数は文字�
 - `profile` の v2 -> v3 変換では `nvencc_advanced` を既定値（空/false/null）で補完する
 - `profile` の v3 -> v4 変換では `max_cll` / `master_display` / `dolby_vision_rpu` を削除し、`nvencc_advanced.avsw_decoder` を空文字で補完する
 
+### 10.3.1 profiles.json フォーマットフォールバック
+
+`profiles.json` の読み込み時、正規フォーマット `{"profiles": [...]}` のパースが失敗した場合、フラット配列 `[{...}, {...}]` としてのパースを試行する（後方互換）。フラット配列として読み込めた場合は、マイグレーション後に正規フォーマットで再保存する。
+
+両方のパースが失敗した場合は、破損ファイルを `.broken.{timestamp}` にリネームしてバックアップし、`GeneratePresets()` でビルトインプリセット4件を再生成する。
+
+`app.go` の `Startup()` では `profileMgr.Load()` のエラーをログ出力する。
+
 ## 10.4 残存 tmp 検出
 
 - 実行中に生成した temp パスを `runtime/temp_index.json` に追記
@@ -795,6 +825,17 @@ v1では未検出でも実行可能とする（警告のみ）。将来のadapte
 - 初期対応言語: `ja`, `en`
 - 翻訳キーは機能単位で管理（例: `encode.start`, `queue.clear`）
 - エラーメッセージは backend でコード化し frontend でローカライズ
+
+### 12.1 実行制御ボタンのラベル
+
+停止と中止の区別を明確にするため、以下のラベルとツールチップを使用する。
+
+| キー | ja | en |
+| --- | --- | --- |
+| `encode.stop` | 残りをスキップ | Stop After Current |
+| `encode.abort` | すべて強制終了 | Abort All |
+| `encode.stopTooltip` | 現在実行中のジョブ完了後、残りのジョブをスキップします | Finish the current job, then skip the rest |
+| `encode.abortTooltip` | 実行中のジョブを含めすべてを即座に強制終了します | Kill all running jobs immediately |
 
 ## 13. ログ設計
 
