@@ -52,8 +52,10 @@
   },
   "encode": {
     "start": "エンコード開始",
-    "stop": "停止",
-    "abort": "中止",
+    "stop": "残りをスキップ",
+    "abort": "すべて強制終了",
+    "stopTooltip": "現在実行中のジョブ完了後、残りのジョブをスキップします",
+    "abortTooltip": "実行中のジョブを含めすべてを即座に強制終了します",
     "cancel": "キャンセル",
     "progress": "進捗",
     "completed": "完了",

@@ -1,14 +1,15 @@
 import { useTranslation } from "react-i18next";
 import type { JobProgress } from "@/stores/encodeStore";
-import { CheckCircle, XCircle, Clock, Loader, MinusCircle, AlertTriangle } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Loader, MinusCircle, AlertTriangle, X } from "lucide-react";
 
 interface JobProgressItemProps {
   job: JobProgress;
   selected: boolean;
   onClick: () => void;
+  onSkip?: (jobId: string) => void;
 }
 
-export function JobProgressItem({ job, selected, onClick }: JobProgressItemProps) {
+export function JobProgressItem({ job, selected, onClick, onSkip }: JobProgressItemProps) {
   const { t } = useTranslation();
 
   const fileName = job.inputPath ? job.inputPath.split(/[\\/]/).pop() || job.jobId : job.jobId;
@@ -45,7 +46,7 @@ export function JobProgressItem({ job, selected, onClick }: JobProgressItemProps
   return (
     <div
       onClick={onClick}
-      className="px-3.5 py-2.5 cursor-pointer transition-colors duration-100"
+      className="group px-3.5 py-2.5 cursor-pointer transition-colors duration-100"
       style={{
         borderBottom: '1px solid rgba(255,255,255,0.04)',
         background: selected ? 'rgba(78, 205, 196, 0.06)' : 'transparent',
@@ -61,6 +62,15 @@ export function JobProgressItem({ job, selected, onClick }: JobProgressItemProps
           <span className="text-[10px] font-mono" style={{ color: '#4ecdc4' }}>
             {job.fps.toFixed(1)} fps
           </span>
+        )}
+        {job.status === "pending" && onSkip && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onSkip(job.jobId); }}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-white/10"
+            title={t("encode.skipped")}
+          >
+            <X size={12} style={{ color: '#5c5c68' }} />
+          </button>
         )}
       </div>
 

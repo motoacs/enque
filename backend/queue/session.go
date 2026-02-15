@@ -90,6 +90,9 @@ type Session struct {
 	EncoderType    string
 	AppCfg         AppConfigSnapshot
 
+	// Skip set for individual job skipping
+	SkipSet map[string]bool
+
 	// Counters
 	TotalJobs     int
 	CompletedJobs int
@@ -117,6 +120,7 @@ func NewSession(id string, jobs []JobInput, encoderType string, appCfg AppConfig
 		TotalJobs:   len(jobs),
 		EncoderType: encoderType,
 		AppCfg:      appCfg,
+		SkipSet:     make(map[string]bool),
 	}
 }
 
@@ -138,6 +142,20 @@ func (s *Session) RequestAbort() {
 		s.State = StateAborting
 		s.AbortRequested = true
 	}
+}
+
+// RequestSkipJob marks a single job to be skipped.
+func (s *Session) RequestSkipJob(jobID string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.SkipSet[jobID] = true
+}
+
+// ShouldSkipJob returns whether a specific job should be skipped.
+func (s *Session) ShouldSkipJob(jobID string) bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.SkipSet[jobID]
 }
 
 // IsStopping returns whether stop or abort has been requested.

@@ -48,6 +48,7 @@ interface EncodeState {
 
   // Actions
   setSessionState: (state: SessionState) => void;
+  initPendingJobs: (jobs: { jobId: string; inputPath: string }[]) => void;
   onSessionStarted: (data: Record<string, unknown>) => void;
   onJobStarted: (data: Record<string, unknown>) => void;
   onJobProgress: (data: Record<string, unknown>) => void;
@@ -57,6 +58,7 @@ interface EncodeState {
   onSessionFinished: (data: Record<string, unknown>) => void;
   onJobNeedsOverwrite: (data: Record<string, unknown>) => void;
   onWarning: (data: Record<string, unknown>) => void;
+  skipPendingJob: (jobId: string) => void;
   clearOverwriteRequest: () => void;
   resetSession: () => void;
 }
@@ -72,16 +74,25 @@ export const useEncodeStore = create<EncodeState>((set) => ({
 
   setSessionState: (sessionState) => set({ sessionState }),
 
+  initPendingJobs: (jobs) =>
+    set((s) => {
+      const progress: Record<string, JobProgress> = {};
+      for (const j of jobs) {
+        progress[j.jobId] = { jobId: j.jobId, status: "pending", inputPath: j.inputPath };
+      }
+      return { jobProgress: progress };
+    }),
+
   onSessionStarted: (data) =>
-    set({
+    set((s) => ({
       sessionId: data.session_id as string,
       sessionState: "running",
-      jobProgress: {},
+      jobProgress: s.jobProgress,
       jobLogs: {},
       sessionSummary: null,
       overwriteRequest: null,
       warnings: [],
-    }),
+    })),
 
   onJobStarted: (data) =>
     set((s) => ({
@@ -187,6 +198,18 @@ export const useEncodeStore = create<EncodeState>((set) => ({
     set((s) => ({
       warnings: [...s.warnings, data.message as string].slice(-50),
     })),
+
+  skipPendingJob: (jobId) =>
+    set((s) => {
+      const existing = s.jobProgress[jobId];
+      if (!existing) return s;
+      return {
+        jobProgress: {
+          ...s.jobProgress,
+          [jobId]: { ...existing, status: "skipped" },
+        },
+      };
+    }),
 
   clearOverwriteRequest: () => set({ overwriteRequest: null }),
 

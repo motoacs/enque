@@ -38,6 +38,8 @@ export function SaveAppConfig(arg1:string):Promise<void>;
 
 export function SetDefaultProfile(arg1:string):Promise<void>;
 
+export function SkipJob(arg1:string,arg2:string):Promise<void>;
+
 export function StartEncode(arg1:string):Promise<void>;
 
 export function UpsertProfile(arg1:string):Promise<void>;

@@ -162,6 +162,19 @@ func (m *Manager) RequestAbort(sessionID string) error {
 	return nil
 }
 
+// SkipJob marks a pending job to be skipped when the worker picks it up.
+func (m *Manager) SkipJob(sessionID, jobID string) error {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	if m.session == nil || m.session.ID != sessionID {
+		return fmt.Errorf("session not found: %s", sessionID)
+	}
+
+	m.session.RequestSkipJob(jobID)
+	return nil
+}
+
 // CancelJob cancels a single running job.
 func (m *Manager) CancelJob(sessionID, jobID string) error {
 	m.mu.RLock()

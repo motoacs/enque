@@ -70,6 +70,10 @@ export function SetDefaultProfile(arg1) {
   return window['go']['app']['App']['SetDefaultProfile'](arg1);
 }
 
+export function SkipJob(arg1, arg2) {
+  return window['go']['app']['App']['SkipJob'](arg1, arg2);
+}
+
 export function StartEncode(arg1) {
   return window['go']['app']['App']['StartEncode'](arg1);
 }

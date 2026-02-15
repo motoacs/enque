@@ -46,7 +46,9 @@ func New() *App {
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
 	a.configMgr.Load()
-	a.profileMgr.Load()
+	if err := a.profileMgr.Load(); err != nil {
+		fmt.Printf("warning: failed to load profiles: %v\n", err)
+	}
 
 	logger, err := logging.NewAppLogger(config.LogsDir())
 	if err != nil {
@@ -203,6 +205,11 @@ func (a *App) RequestGracefulStop(sessionID string) error {
 // RequestAbort aborts the session.
 func (a *App) RequestAbort(sessionID string) error {
 	return a.queueMgr.RequestAbort(sessionID)
+}
+
+// SkipJob marks a pending job to be skipped.
+func (a *App) SkipJob(sessionID string, jobID string) error {
+	return a.queueMgr.SkipJob(sessionID, jobID)
 }
 
 // CancelJob cancels a single running job.

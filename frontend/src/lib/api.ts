@@ -55,6 +55,10 @@ export async function requestAbort(sessionId: string): Promise<void> {
   return getApp().RequestAbort(sessionId);
 }
 
+export async function skipJob(sessionId: string, jobId: string): Promise<void> {
+  return getApp().SkipJob(sessionId, jobId);
+}
+
 export async function cancelJob(sessionId: string, jobId: string): Promise<void> {
   return getApp().CancelJob(sessionId, jobId);
 }

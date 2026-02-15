@@ -15,11 +15,11 @@ export function EncodeControls({ onStop, onAbort }: EncodeControlsProps) {
     <div className="flex items-center gap-3 px-5 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(18, 18, 26, 0.5)' }}>
       {sessionState === "running" && (
         <>
-          <button onClick={onStop} className="btn-warning">
+          <button onClick={onStop} className="btn-warning" title={t("encode.stopTooltip")}>
             <StopCircle size={13} />
             {t("encode.stop")}
           </button>
-          <button onClick={onAbort} className="btn-danger">
+          <button onClick={onAbort} className="btn-danger" title={t("encode.abortTooltip")}>
             <Square size={13} />
             {t("encode.abort")}
           </button>

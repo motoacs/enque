@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -38,8 +39,19 @@ func (m *Manager) Load() error {
 	}
 
 	var pf ProfilesFile
+	needsResave := false
 	if err := json.Unmarshal(data, &pf); err != nil {
-		return fmt.Errorf("parse profiles: %w", err)
+		// Try flat array fallback: profiles.json may be [{ ... }] instead of { "profiles": [{ ... }] }
+		var flat []Profile
+		if err2 := json.Unmarshal(data, &flat); err2 != nil {
+			// Both formats failed: backup broken file and regenerate presets
+			backupPath := m.filePath + fmt.Sprintf(".broken.%d", time.Now().Unix())
+			os.Rename(m.filePath, backupPath)
+			m.profiles = GeneratePresets()
+			return m.saveLocked()
+		}
+		pf.Profiles = flat
+		needsResave = true
 	}
 
 	migrated := make([]Profile, 0, len(pf.Profiles))
@@ -52,6 +64,11 @@ func (m *Manager) Load() error {
 	}
 
 	m.profiles = migrated
+
+	// Re-save in correct format after flat array migration
+	if needsResave {
+		return m.saveLocked()
+	}
 	return nil
 }
 

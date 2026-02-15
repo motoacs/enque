@@ -112,6 +112,9 @@ function App() {
     try {
       setEncodeError(null);
       await api.startEncode(request);
+      useEncodeStore.getState().initPendingJobs(
+        jobs.map((j) => ({ jobId: j.jobId, inputPath: j.inputPath }))
+      );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error("Failed to start encode:", msg);

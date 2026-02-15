@@ -52,8 +52,10 @@
   },
   "encode": {
     "start": "Start Encode",
-    "stop": "Stop",
-    "abort": "Abort",
+    "stop": "Stop After Current",
+    "abort": "Abort All",
+    "stopTooltip": "Finish the current job, then skip the rest",
+    "abortTooltip": "Kill all running jobs immediately",
     "cancel": "Cancel",
     "progress": "Progress",
     "completed": "Completed",

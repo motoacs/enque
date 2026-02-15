@@ -68,9 +68,9 @@ func NewWorker(cfg WorkerConfig) *Worker {
 // Run processes jobs from the channel until it's closed or the session stops.
 func (w *Worker) Run(ctx context.Context, jobs <-chan *QueueJob) {
 	for job := range jobs {
-		if w.session.IsStopping() {
-			w.session.MarkJobStatus(job.JobID, JobSkipped, nil, "session stopping")
-			w.emitJobFinished(job, JobSkipped, nil, "session stopping")
+		if w.session.IsStopping() || w.session.ShouldSkipJob(job.JobID) {
+			w.session.MarkJobStatus(job.JobID, JobSkipped, nil, "skipped by user")
+			w.emitJobFinished(job, JobSkipped, nil, "skipped by user")
 			continue
 		}
 
